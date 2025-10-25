@@ -11,16 +11,42 @@ export type Draw = (ctx: CanvasRenderingContext2D, frameCount: number, sprites?:
 interface CanvasProps extends React.CanvasHTMLAttributes<HTMLCanvasElement> {
     sprites?: Sprite[]
     customDraw?: Draw
+    dayNum?: number
 }
 
 const Canvas: React.FC<CanvasProps> = props => {
-    const { sprites, customDraw, ...rest } = props
+    const { sprites, customDraw, dayNum, ...rest } = props
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
     
+    // day -> multiplier mapping (same mapping you provided)
+    const dayMultiplier: Record<number, number> = {
+        4: 0.90, // dim
+        5: 0.75, // dark
+        6: 0.60, // darker
+        7: 0.45, // darkest
+        8: 0.75, // dark
+        9: 0.90  // dim
+    }
+
+    const getMult = (d?: number) => {
+        if (d === undefined) return 1
+        return dayMultiplier[d] ?? 1
+    }
+
+    const dimHex = (hex: string, mult: number) => {
+        if (!/^#([0-9a-fA-F]{6})$/.test(hex)) return hex
+        const r = Math.min(255, Math.max(0, Math.floor(parseInt(hex.slice(1,3),16) * mult)))
+        const g = Math.min(255, Math.max(0, Math.floor(parseInt(hex.slice(3,5),16) * mult)))
+        const b = Math.min(255, Math.max(0, Math.floor(parseInt(hex.slice(5,7),16) * mult)))
+        return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`
+    }
+
     const draw: Draw = (ctx, frameCount, spritesArg) => {
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
-        ctx.fillStyle = '#708a39'
+        const mult = getMult(dayNum)
+        // base grass color dimmed by day multiplier
+        ctx.fillStyle = dimHex('#708a39', mult)
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
         drawGrassnoise(ctx, frameCount)
         // call external draw if provided, otherwise use internal sprite drawer
@@ -101,6 +127,8 @@ const Canvas: React.FC<CanvasProps> = props => {
         const smallW = Math.ceil(w / pixelSize)
         const smallH = Math.ceil(h / pixelSize)
 
+        const mult = getMult(dayNum) // apply same multiplier to noise colors
+
         // compute each small cell and write it as a block into the full image data
         for (let sy = 0; sy < smallH; sy++) {
             for (let sx = 0; sx < smallW; sx++) {
@@ -120,6 +148,11 @@ const Canvas: React.FC<CanvasProps> = props => {
                 const gg = Math.min(255, g + peak * 60)
                 const bb = Math.min(255, b + peak * 20)
 
+                // apply day multiplier to the noise RGB values
+                const rrM = Math.min(255, Math.max(0, Math.round(rr * mult)))
+                const ggM = Math.min(255, Math.max(0, Math.round(gg * mult)))
+                const bbM = Math.min(255, Math.max(0, Math.round(bb * mult)))
+
                 // fill the pixelSize x pixelSize block
                 for (let dy = 0; dy < pixelSize; dy++) {
                     const py = sy * pixelSize + dy
@@ -128,9 +161,9 @@ const Canvas: React.FC<CanvasProps> = props => {
                         const px = sx * pixelSize + dx
                         if (px >= w) continue
                         const idx = (py * w + px) * 4
-                        d[idx + 0] = rr
-                        d[idx + 1] = gg
-                        d[idx + 2] = bb
+                        d[idx + 0] = rrM
+                        d[idx + 1] = ggM
+                        d[idx + 2] = bbM
                         d[idx + 3] = 255
                     }
                 }
@@ -149,7 +182,7 @@ const Canvas: React.FC<CanvasProps> = props => {
             return
         }
         for (const sprite of sprites) {
-            ctx.fillStyle = sprite.color || 'brown'
+            ctx.fillStyle = sprite.color || 'black'
             ctx.fillRect(sprite.x, sprite.y, 1, 1)
         }
         ctx.restore()
@@ -191,8 +224,8 @@ const Canvas: React.FC<CanvasProps> = props => {
             window.cancelAnimationFrame(animationFrameId)
             window.removeEventListener('resize', setSize)
         }
-    // re-run effect when sprites or customDraw change so the animation uses latest values
-    }, [sprites, customDraw])
+    // re-run effect when sprites or customDraw or dayNum change so the animation uses latest values
+    }, [sprites, customDraw, dayNum])
     
     return <canvas ref={canvasRef} style={{ imageRendering: 'pixelated' }} {...rest}/>
 }

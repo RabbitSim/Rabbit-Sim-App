@@ -5,7 +5,7 @@ import DeadRabbit from './classes/ui/DeadRabbit';
 import FoodStorage from './classes/ui/FoodStorage';
 import './App.css'
 import { useEffect, useState, useRef } from 'react'
-import Button from './components/button';
+import Button from './components/Button';
  
 function App() {
   const [simulating, setSimulating] = useState<boolean>(false)
@@ -13,6 +13,8 @@ function App() {
   const [dPressed, setDPressed] = useState<boolean>(false)
   const [threePressed, setThreePressed] = useState<boolean>(false)
   const [ePressed, setEPressed] = useState<boolean>(false)
+  const [nPressed, setNPressed] = useState<boolean>(false)
+  const [dayNum, setDayNum] = useState<number>(0)
   const rabbitsRef = useRef<Rabbit[]>([]);
   const deadRabbitsRef = useRef<DeadRabbit[]>([]);
   const foodStorageRef = useRef<FoodStorage[]>([]);
@@ -71,6 +73,16 @@ function App() {
           }
         }
       }
+      if (e.key.toLowerCase() === 'n') {
+        if (!nPressed) {
+        console.log("'n' key pressed")
+        setNPressed(true)
+
+        // advance day number by 1 if it reaches 10 reset to 0
+        setDayNum(prevDay => (prevDay + 1) % 10);
+        console.log(`Day advanced to ${ (dayNum + 1) % 10 }`);
+        }
+      }
     }
     const upHandler = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() === 's') {
@@ -89,6 +101,11 @@ function App() {
         console.log("'e' key released")
         setEPressed(false)
       }
+      if (e.key.toLowerCase() === 'n') {
+        console.log("'n' key released")
+        setNPressed(false)
+      }
+      
     }
 
     window.addEventListener('keydown', downHandler)
@@ -97,7 +114,7 @@ function App() {
       window.removeEventListener('keydown', downHandler)
       window.removeEventListener('keyup', upHandler)
     }
-  }, [sPressed, dPressed, threePressed, ePressed]);
+  }, [sPressed, dPressed, threePressed, ePressed, nPressed]);
  
   // animation loop: call behavior update for each rabbit every frame
   useEffect(() => {
@@ -206,12 +223,41 @@ function App() {
       sprites.push({ x: decor.x + sprite.x, y: decor.y + sprite.y, color: sprite.color })
     }
   }
+
+  const dayNumHelper = (dayNumParam?: number, color?: string) => {
+        if (dayNumParam === undefined) return color
+        if (color === undefined) return color
+
+        // scale color darkness based on dayNum: 4 dim, 5 dark, 6 darker, 7 darkest, 8 dark, 9 dim
+        // only handle 6-digit hex colors here; other formats are returned unchanged
+        if (!/^#([0-9a-fA-F]{6})$/.test(color)) return color
+
+        // mapping of day -> multiplier (lower = darker)
+        const mapping: Record<number, number> = {
+          4: 0.90, // dim
+          5: 0.75, // dark
+          6: 0.60, // darker
+          7: 0.45, // darkest
+          8: 0.75, // dark (returns toward less dark)
+          9: 0.90  // dim (back to dim)
+        }
+
+        const mult = mapping[dayNumParam]
+        if (mult === undefined) return color // days outside 4-9 unchanged
+
+        const r = Math.min(255, Math.max(0, Math.floor(parseInt(color.slice(1, 3), 16) * mult)))
+        const g = Math.min(255, Math.max(0, Math.floor(parseInt(color.slice(3, 5), 16) * mult)))
+        const b = Math.min(255, Math.max(0, Math.floor(parseInt(color.slice(5, 7), 16) * mult)))
+        const dimmedColor = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
+
+        return dimmedColor
+    }
  
   const drawSprites: Draw = (ctx, frameCount, spritesArg) => {
     if (!spritesArg) return
     ctx.save()
     for (const s of spritesArg) {
-      ctx.fillStyle = s.color || 'brown'
+      ctx.fillStyle = dayNumHelper(dayNum, s.color) || 'brown'
       ctx.fillRect(Math.floor(s.x), Math.floor(s.y), 1, 1)
     }
     ctx.restore()
@@ -233,7 +279,7 @@ function App() {
       </div>
 
 
-      <Canvas sprites={sprites} customDraw={drawSprites} />
+      <Canvas sprites={sprites} customDraw={drawSprites} dayNum={dayNum} />
 
       <div className='stats'>
         <h2> Current Colony Stats: </h2>
