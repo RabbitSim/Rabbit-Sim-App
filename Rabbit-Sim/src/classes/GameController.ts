@@ -1,5 +1,6 @@
 import {Colony} from "./Colony.ts"
 import {OnlySleepAndEat} from "./strategies/OnlySleepAndEat.ts";
+import { Time } from "./Time"
 
 export class GameController {
 
@@ -7,12 +8,12 @@ export class GameController {
     private _winnerDeclared: boolean = false;
     // private _winner?: Colony;
     private _priority: number = 0;
+    private _time: Time;
 
 
     constructor() {
-
+        this._time = new Time();
     }
-
 
     private gameLoop(): void {
 
@@ -24,7 +25,7 @@ export class GameController {
         while (!this._winnerDeclared) {
 
             this.takeTurns();
-
+            this.advanceTime();
             if (this._winnerDeclared) { break; }
         }
     }
@@ -34,9 +35,12 @@ export class GameController {
         const n: number = this.colonies.length;
         if (n <= 0) {return;} // No colonies!
 
+        const isDay = this._time.day;
+
         for (let i = 0; i < n; i++) {
-            if (!this.colonies[index % n].isDefeated) { // Defeated colonies do not get actions
-                 this.colonies[index % n].takeAction();
+            const colony = this.colonies[index % n];
+            if (!colony.isDefeated) { // Defeated colonies do not get actions
+                colony.takeAction(isDay);
 
                 console.log(this.colonies[index % n].population);
             }
@@ -44,6 +48,15 @@ export class GameController {
         }
 
         this.priority = (this.priority + 1) % n;
+    }
+
+    private advanceTime(): void {
+        this._time.nextTurn();
+        if (this._time.night) {
+            console.log("The veil of night descends - the hunters move unseen.");
+        } else if (this._time.day && this._time.turnNum === 0) {
+            console.log("The sun ascends; the hunters shrink to whispers.");
+        }
     }
 
     // Getters and Setters
@@ -71,6 +84,10 @@ export class GameController {
 
     set priority(value: number) {
         this._priority = value;
+    }
+
+    get time(): Time {
+        return this._time;
     }
 
     public startGame(): void {
