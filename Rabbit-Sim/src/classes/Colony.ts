@@ -4,7 +4,7 @@ export class Colony {
     private _name: string;
     private _population: number;
     private _agriculture: number;
-    private _military: number;
+    private _offence: number;
     private _energy: number;
     private _unrest: number;
     private _isDefeated: boolean = false;
@@ -15,12 +15,12 @@ export class Colony {
     private _nextAction: Action | null = null;
 
     constructor(name: string, population: number, agriculture: number,
-    military: number, energy: number, morale: number, foodStorage: number, defence: number) {
+    offence: number, energy: number, morale: number, foodStorage: number, defence: number) {
         // Attributes of each colony
         this._name = name;
         this._population = population;
         this._agriculture = agriculture;
-        this._military = military;
+        this._offence = offence;
         this._energy = energy;
         this._unrest = morale;
         this._foodStorage = foodStorage;
@@ -80,12 +80,12 @@ export class Colony {
         this._agriculture = value;
     }
 
-    get military(): number {
-        return this._military;
+    get offence(): number {
+        return this._offence;
     }
 
     set military(value: number) {
-        this._military = value;
+        this._offence = value;
     }
 
     get energy(): number {
