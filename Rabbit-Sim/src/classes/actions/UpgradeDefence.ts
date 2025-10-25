@@ -3,6 +3,6 @@ import type { Colony } from "../Colony";
 
 export class UpgradeDefence implements Action{
     takeAction(actor: Colony, target?: Colony, context?: any): void | Promise<void> {
-        actor.defence *= 1.2;
+        actor.defence++;
     }
 }

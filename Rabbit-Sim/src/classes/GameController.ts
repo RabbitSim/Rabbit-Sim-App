@@ -20,7 +20,6 @@ class GameController {
         while (!this._winnerDeclared) {
 
             this.takeTurns();
-            this.logGameState();
 
             if (this._winnerDeclared) { break; }
         }

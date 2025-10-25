@@ -84,6 +84,10 @@ export class Colony {
         return this._offence;
     }
 
+    set offence(value: number) {
+        this._offence = value;
+    }
+
     set military(value: number) {
         this._offence = value;
     }
