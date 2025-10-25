@@ -1,6 +1,7 @@
 import Canvas, { type Sprite, type Draw } from './canvas';
 import { type Decoration, TreeSprite, RockSprite, BurrowSprite } from './classes/ui/Decorations';
 import Rabbit from './classes/ui/Rabbit';
+import DeadRabbit from './classes/ui/DeadRabbit';
 import './App.css'
 import { useEffect, useState, useRef } from 'react'
 import Button from './components/button';
@@ -8,7 +9,9 @@ import Button from './components/button';
 function App() {
   const [simulating, setSimulating] = useState(false)
   const [sPressed, setSPressed] = useState(false)
+  const [dPressed, setDPressed] = useState(false)
   const rabbitsRef = useRef<Rabbit[]>([]);
+  const deadRabbitsRef = useRef<DeadRabbit[]>([]);
   const [, setTick] = useState(0) // force re-render each frame
    const rabbitCount = 10;
   
@@ -30,13 +33,31 @@ function App() {
  
         }
       }
+      if (e.key.toLowerCase() === 'd') {
+        if (!dPressed) {
+          console.log("'d' key pressed")
+          setDPressed(true)
+
+          // turn all rabbits to dead
+          for (const r of rabbitsRef.current) {
+            deadRabbitsRef.current.push(new DeadRabbit(r.x, r.y, 100));
+          }
+          rabbitsRef.current = [];
+        }
+      }
     }
     const upHandler = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() === 's') {
         console.log("'s' key released")
         setSPressed(false)
       }
+      if (e.key.toLowerCase() === 'd') {
+        console.log("'d' key released")
+        setDPressed(false)
+      }
     }
+
+
  
     window.addEventListener('keydown', downHandler)
     window.addEventListener('keyup', upHandler)
@@ -44,7 +65,7 @@ function App() {
       window.removeEventListener('keydown', downHandler)
       window.removeEventListener('keyup', upHandler)
     }
-  }, [sPressed])
+  }, [sPressed, dPressed])
  
   // animation loop: call behavior update for each rabbit every frame
   useEffect(() => {
@@ -58,6 +79,12 @@ function App() {
 
       // remove rabbits that finished their round-trip
       rabbitsRef.current = rabbitsRef.current.filter(r => !r.isCompleted());
+
+      // reduce lifetime of dead rabbits and remove expired ones
+      for (const dr of deadRabbitsRef.current) {
+        dr.decreaseLifetime();
+      }
+      deadRabbitsRef.current = deadRabbitsRef.current.filter(dr => !dr.isExpired());
 
       // force a render so sprites are recomputed and Canvas redraws
       setTick(t => t + 1)
@@ -105,7 +132,10 @@ function App() {
      return { x: pos.x, y: pos.y, color: rabbit.color };
    });
 
-
+   // add dead rabbit sprites to main sprite list
+   for (const dr of deadRabbitsRef.current) {
+     sprites.push({ x: dr.x, y: dr.y, color: dr.color });
+   }
 
   // add rocks to main sprite list
   for (const rock of addRandomRocks) {
