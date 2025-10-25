@@ -23,7 +23,7 @@ function App() {
  
           // spawn 20 rabbits at 60 40
           for (let i = 0; i < rabbitCount; i++) {
-            rabbitsRef.current.push(new Rabbit(50 + Math.random() * 2, 30 + Math.random() * 2, { x: 0, y: 0 }));
+            rabbitsRef.current.push(new Rabbit(60 + Math.random() * 2, 40 + Math.random() * 2, { x: 0, y: 0 }));
           }
  
         }
@@ -97,20 +97,28 @@ function App() {
     });
   }
  
-  const decorations: Decoration[] = addRandomRocks.concat(addRandomTrees);
  
   const rabbitsprites: Sprite[] = rabbitsRef.current.map(rabbit => {
      const pos = rabbit.getPosition();
      return { x: pos.x, y: pos.y, color: rabbit.color };
    });
- 
+
+
+
+  // add rocks to main sprite list
+  for (const rock of addRandomRocks) {
+    for (const sprite of rock.sprites) {
+      sprites.push({ x: rock.x + sprite.x, y: rock.y + sprite.y, color: sprite.color })
+    }
+  }
+
   // add rabbit sprites to main sprite list
   for (const rs of rabbitsprites) {
     sprites.push(rs);
   }
  
   // add decoration sprites to main sprite list
-  for (const decor of decorations) {
+  for (const decor of addRandomTrees) {
     for (const sprite of decor.sprites) {
       sprites.push({ x: decor.x + sprite.x, y: decor.y + sprite.y, color: sprite.color })
     }
