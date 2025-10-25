@@ -23,3 +23,15 @@ export const RockSprite: Sprite[] = [
   { x: 1, y: 0, color: '#6f665dff' },
   { x: 0, y: 0, color: '#5c5752ff' },
 ];
+
+export const BurrowSprite: Sprite[] = [
+  { x: 0, y: 0, color: '#29231eff' },
+  { x: 0, y: 1, color: '#29231eff' },
+  { x: 1, y: 1, color: '#3b3429ff' },
+  { x: -1, y: 1, color: '#29231eff' },
+    
+  { x: 1, y: 0, color: '#b39667ff' },
+  { x: 2, y: 1, color: '#8c6f42ff' },
+  { x: 2, y: 0, color: '#b29b76ff' },
+  { x: 3, y: 1, color: '#c4a77bff' }
+];
