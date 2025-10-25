@@ -4,11 +4,10 @@ import Rabbit from './classes/ui/Rabbit';
 import DeadRabbit from './classes/ui/DeadRabbit';
 import FoodStorage from './classes/ui/FoodStorage';
 import './App.css'
-// Added useCallback and useMemo
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import Button from './components/Button';
 
-// --- Constants (Moved outside component) ---
+// --- Constants ---
 
 const treePositions = [{ x: 12, y: 8 }, { x: 14, y: 9 }, { x: 13, y: 7 }, { x: 15, y: 10 }, { x: 11, y: 9 },{ x: 17, y: 8 }, { x: 16, y: 11 }, { x: 18, y: 9 },{ x: 55, y: 28 }, { x: 56, y: 29 }, { x: 57, y: 27 }, { x: 58, y: 30 }, { x: 54, y: 29 },{ x: 60, y: 28 }, { x: 61, y: 31 }, { x: 59, y: 27 },{ x: 22, y: 45 }, { x: 23, y: 44 }, { x: 24, y: 46 }, { x: 21, y: 47 }, { x: 17, y: 44 },{ x: 20, y: 46 }, { x: 26, y: 43 }, { x: 20, y: 43 },{ x: 95, y: 10 }, { x: 96, y: 11 }, { x: 97, y: 9 }, { x: 98, y: 12 }, { x: 94, y: 10 },{ x: 100, y: 9 }, { x: 99, y: 11 }, { x: 101, y: 10 },{ x: 108, y: 50 }, { x: 110, y: 51 }, { x: 111, y: 52 }, { x: 109, y: 49 }, { x: 107, y: 50 },{ x: 112, y: 51 }, { x: 110, y: 53 }, { x: 108, y: 52 }, { x: 3, y: 5 }, { x: 40, y: 22 }, { x: 70, y: 15 }, { x: 88, y: 33 }, { x: 47, y: 12 },{ x: 33, y: 38 }, { x: 64, y: 55 }, { x: 115, y: 42 }, { x: 77, y: 19 }, { x: 52, y: 59 },{ x: 6, y: 26 }, { x: 82, y: 8 }, { x: 119, y: 24 }, { x: 92, y: 57 }];
  
@@ -19,7 +18,7 @@ const burrowPositions = [{ x: 100, y: 30 }, { x: 60, y: 40 }, { x: 30, y: 15 }, 
 const rabbitCount = 10;
 const RabbitMinDis = 1;
 
-// --- Helper Function (Moved outside component) ---
+// --- Helper Function ---
 
 const dayNumHelper = (dayNumParam?: number, color?: string) => {
   if (dayNumParam === undefined) return color
@@ -61,7 +60,26 @@ function App() {
   const nPressedRef = useRef<boolean>(false)
   
   const [dayNum, setDayNum] = useState<number>(0)
-  const rabbitsRef = useRef<Rabbit[]>([]);
+  const rabbitsRef1 = useRef<Rabbit[]>([]);
+  const rabbitsRef2 = useRef<Rabbit[]>([]);
+  const rabbitsRef3 = useRef<Rabbit[]>([]);
+  const rabbitsRef4 = useRef<Rabbit[]>([]);
+  const rabbitsRef5 = useRef<Rabbit[]>([]);
+
+  type Goal = { x: number; y: number };
+
+  // Define one goal for each rabbit group (rabbitsRef1..rabbitsRef5)
+  const groupGoals = useMemo<Goal[]>(
+    () => [
+      { x: 0, y: 0 }, // goal for rabbitsRef1
+      { x: 100, y: 0 }, // goal for rabbitsRef2
+      { x: 0, y: 75 }, // goal for rabbitsRef3
+      { x: 100, y: 75 }, // goal for rabbitsRef4
+      { x: 50, y: 50 } // goal for rabbitsRef5
+    ],
+    []
+  );
+
   const deadRabbitsRef = useRef<DeadRabbit[]>([]);
   const foodStorageRef = useRef<FoodStorage[]>([]);
   const [, setTick] = useState(0) // force re-render each frame
@@ -77,7 +95,7 @@ function App() {
 
           // spawn 20 rabbits at 60 40
           for (let i = 0; i < rabbitCount; i++) {
-            rabbitsRef.current.push(new Rabbit(60 + Math.random() * 2, 40 + Math.random() * 2, { x: 0, y: 0 }));
+            rabbitsRef1.current.push(new Rabbit(60 + Math.random() * 2, 40 + Math.random() * 2, groupGoals[0]));
           }
         }
       }
@@ -87,10 +105,10 @@ function App() {
           dPressedRef.current = true;
 
           // turn all rabbits to dead
-          for (const r of rabbitsRef.current) {
+          for (const r of rabbitsRef1.current) {
             deadRabbitsRef.current.push(new DeadRabbit(r.x, r.y, 100));
           }
-          rabbitsRef.current = [];
+          rabbitsRef1.current = [];
         }
       }
       if (key === '3') {
@@ -169,14 +187,30 @@ function App() {
     const loop = () => {
       // This logic will run only if simulating
       if (simulating) {
-        const arr = rabbitsRef.current
-        for (const r of arr) {
-          // call the flocking/separation step
-          r.seperateFromAlignmentCohesion(arr, RabbitMinDis, 5);
+        const allGroups = [
+          rabbitsRef1.current,
+          rabbitsRef2.current,
+          rabbitsRef3.current,
+          rabbitsRef4.current,
+          rabbitsRef5.current
+        ];
+
+        // combined list so rabbits consider others across groups as well
+        const allRabbits = allGroups.flat();
+
+        for (const group of allGroups) {
+          for (const r of group) {
+            // call the flocking/separation step using the combined list
+            r.seperateFromAlignmentCohesion(allRabbits, RabbitMinDis, 5);
+          }
         }
 
         // remove rabbits that finished their round-trip
-        rabbitsRef.current = rabbitsRef.current.filter(r => !r.isCompleted());
+        rabbitsRef1.current = rabbitsRef1.current.filter(r => !r.isCompleted());
+        rabbitsRef2.current = rabbitsRef2.current.filter(r => !r.isCompleted());
+        rabbitsRef3.current = rabbitsRef3.current.filter(r => !r.isCompleted());
+        rabbitsRef4.current = rabbitsRef4.current.filter(r => !r.isCompleted());
+        rabbitsRef5.current = rabbitsRef5.current.filter(r => !r.isCompleted());
 
         // reduce lifetime of dead rabbits and remove expired ones
         for (const dr of deadRabbitsRef.current) {
@@ -200,7 +234,7 @@ function App() {
     }
   }, []); // Empty deps, runs once
   
-  // --- Memoized Static Sprites (Calculated Once) ---
+  // --- Memoized Static Sprites ---
 
   const staticBurrowSprites = useMemo(() => {
     const sprites: Sprite[] = [];
@@ -229,7 +263,7 @@ function App() {
       }
     }
     return sprites;
-  }, []); // Empty deps, calculates once
+  }, []);
 
   const staticRockSprites = useMemo(() => {
     const sprites: Sprite[] = [];
@@ -250,12 +284,30 @@ function App() {
     return sprites;
   }, []); // Empty deps, calculates once
 
-  // --- Dynamic Sprites (Calculated Every Frame) ---
+  // --- Dynamic Sprites ---
 
-  const rabbitsprites: Sprite[] = rabbitsRef.current.map(rabbit => {
-     const pos = rabbit.getPosition();
-     return { x: pos.x, y: pos.y, color: rabbit.color };
-   });
+  const rabbitsprites: Sprite[] = [
+    ...rabbitsRef1.current.map(rabbit => {
+      const pos = rabbit.getPosition();
+      return { x: pos.x, y: pos.y, color: rabbit.color };
+    }),
+    ...rabbitsRef2.current.map(rabbit => {
+      const pos = rabbit.getPosition();
+      return { x: pos.x, y: pos.y, color: rabbit.color };
+    }),
+    ...rabbitsRef3.current.map(rabbit => {
+      const pos = rabbit.getPosition();
+      return { x: pos.x, y: pos.y, color: rabbit.color };
+    }),
+    ...rabbitsRef4.current.map(rabbit => {
+      const pos = rabbit.getPosition();
+      return { x: pos.x, y: pos.y, color: rabbit.color };
+    }),
+    ...rabbitsRef5.current.map(rabbit => {
+      const pos = rabbit.getPosition();
+      return { x: pos.x, y: pos.y, color: rabbit.color };
+    })
+  ];
 
    const deadRabbitSprites: Sprite[] = deadRabbitsRef.current.map(dr => ({
      x: dr.x, y: dr.y, color: dr.color
@@ -316,7 +368,7 @@ function App() {
 
       <div className='stats'>
         <h2> Current Colony Stats: </h2>
-        <p> Population: {rabbitsRef.current.length} </p>
+        <p> Population: {rabbitsRef1.current.length} </p>
         <p> Agriculture: </p>
         <p> Offence:  </p>
         <p> Energy: </p>
