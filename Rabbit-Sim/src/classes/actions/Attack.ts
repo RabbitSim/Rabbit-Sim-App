@@ -1,4 +1,4 @@
-import type { Action } from "./Action";
+import type { IAction } from "./IAction";
 import type { Colony } from "../Colony";
 import { ColonyMath } from "../math/ColonyMath";
 
@@ -8,7 +8,7 @@ import { ColonyMath } from "../math/ColonyMath";
  * chance – just one chance – to come back here and tell our enemies that they may take our lives 
  * but they’ll never take our freedom!!!
  */
-export class Attack implements Action {
+export class Attack implements IAction {
     takeAction(actor: Colony, target?: Colony): void {
         if (!target) return;
 
