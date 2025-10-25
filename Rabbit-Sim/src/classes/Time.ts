@@ -21,5 +21,4 @@ class Time {
             this.day = true;
         }
     }
-    
 }
