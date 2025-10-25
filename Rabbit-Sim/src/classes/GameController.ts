@@ -4,7 +4,7 @@ class GameController {
 
     private _colonies: Array<Colony> = [];
     private _winnerDeclared: boolean = false;
-    private _winner: Colony;
+    private _winner?: Colony;
     private _priority: number = 0;
 
 

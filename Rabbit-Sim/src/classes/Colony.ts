@@ -6,7 +6,7 @@ export class Colony {
     private _agriculture: number;
     private _military: number;
     private _energy: number;
-    private _morale: number;
+    private _unrest: number;
     private _isDefeated: boolean = false;
     private _foodStorage: number;
     private _relationships: Map<Colony, number> = new Map();
@@ -21,7 +21,7 @@ export class Colony {
         this._agriculture = agriculture;
         this._military = military;
         this._energy = energy;
-        this._morale = morale;
+        this._unrest = morale;
         this._foodStorage = foodStorage;
     }
 
@@ -94,12 +94,12 @@ export class Colony {
         this._energy = value;
     }
 
-    get morale(): number {
-        return this._morale;
+    get unrest(): number {
+        return this._unrest;
     }
 
-    set morale(value: number) {
-        this._morale = value;
+    set unrest(value: number) {
+        this._unrest = value;
     }
 
     get foodStorage(): number {
@@ -108,6 +108,14 @@ export class Colony {
 
     set foodStorage(value: number) {
         this._foodStorage = value;
+    }
+
+    get relationships(): Map<Colony, number> {
+        return this._relationships;
+    }
+
+    set relationships(value: Map<Colony, number>) {
+        this._relationships = value;
     }
 
 }
