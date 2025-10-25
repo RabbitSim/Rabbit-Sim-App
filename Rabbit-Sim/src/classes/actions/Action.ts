@@ -1,0 +1,3 @@
+interface Action {
+    takeAction(): void;
+}

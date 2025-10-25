@@ -1,19 +1,45 @@
-class Colony {
+export class Colony {
     private _name: string;
     private _population: string;
     private _agriculture: number;
     private _military: number;
     private _energy: number;
     private _morale: number;
+    private _isDefeated: boolean = false;
+
+    private _nextAction: Action;
 
     constructor(name: string, population: string, agriculture: number,
     military: number, energy: number, morale: number) {
+        // Attributes of each colony
         this._name = name;
         this._population = population;
         this._agriculture = agriculture;
         this._military = military;
         this._energy = energy;
         this._morale = morale;
+    }
+
+    public takeAction(): void {
+        _nextAction.takeAction();
+    }
+
+    // Getters & Setters
+
+    get isDefeated(): boolean {
+        return this._isDefeated;
+    }
+
+    set isDefeated(value: boolean) {
+        this._isDefeated = value;
+    }
+
+    get nextAction(): Action {
+        return this._nextAction;
+    }
+
+    set nextAction(value: Action) {
+        this._nextAction = value;
     }
 
     get name(): string {
