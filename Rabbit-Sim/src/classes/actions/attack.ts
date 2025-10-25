@@ -24,8 +24,8 @@ export class Attack implements Action {
 
         const atkPop = actor.population;
         const defPop = target.population;
-        const atkMil = actor.military;
-        const defMil = target.military;
+        const atkMil = actor.offence;
+        const defMil = target.defence;
 
         if (atkPop <= 0 || atkMil <= 0) {
             context?.log?.(`${actor.name} has no effective fighting force and the attack fails.`);
@@ -61,8 +61,8 @@ export class Attack implements Action {
 
         actor.population = newActorPop;
         target.population = newTargetPop;
-        actor.military = Math.max(0, atkMil - actorMilLost);
-        target.military = Math.max(0, defMil - targetMilLost);
+        actor.offence = Math.max(0, atkMil - actorMilLost);
+        target.defence = Math.max(0, defMil - targetMilLost);
 
         if (actor.population === 0) actor.isDefeated = true;
         if (target.population === 0) target.isDefeated = true;
@@ -71,7 +71,7 @@ export class Attack implements Action {
             `${actor.name} attacked ${target.name}: attacker lost ${actorCasualties} pop, defender lost ${targetCasualties} pop.`
         );
         context?.log?.(
-            `${actor.name} -> pop:${actor.population} mil:${actor.military}; ${target.name} -> pop:${target.population} mil:${target.military}`
+            `${actor.name} -> pop:${actor.population} off:${actor.offence}; ${target.name} -> pop:${target.population} def:${target.defence}`
         );
     }
 }
