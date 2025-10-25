@@ -54,6 +54,10 @@ function App() {
   
   // Use refs for key state to prevent re-running useEffect
   const sPressedRef = useRef<boolean>(false)
+  const aPressedRef = useRef<boolean>(false)
+  const zPressedRef = useRef<boolean>(false)
+  const xPressedRef = useRef<boolean>(false)
+  const cPressedRef = useRef<boolean>(false)
   const dPressedRef = useRef<boolean>(false)
   const threePressedRef = useRef<boolean>(false)
   const ePressedRef = useRef<boolean>(false)
@@ -93,9 +97,48 @@ function App() {
           console.log("'s' key pressed")
           sPressedRef.current = true;
 
-          // spawn 20 rabbits at 60 40
           for (let i = 0; i < rabbitCount; i++) {
-            rabbitsRef1.current.push(new Rabbit(60 + Math.random() * 2, 40 + Math.random() * 2, groupGoals[0]));
+            rabbitsRef1.current.push(new Rabbit(100 + Math.random() * 2, 30 + Math.random() * 2, groupGoals[0]));
+          }
+        }
+      }
+      if (key === 'a') {
+        if (!aPressedRef.current) {
+          console.log("'a' key pressed")
+          aPressedRef.current = true;
+
+          for (let i = 0; i < rabbitCount; i++) {
+            rabbitsRef2.current.push(new Rabbit(60 + Math.random() * 2, 40 + Math.random() * 2, groupGoals[1]));
+          }
+        }
+      }
+      if (key === 'z') {
+        if (!zPressedRef.current) {
+          console.log("'z' key pressed")
+          zPressedRef.current = true;
+
+          for (let i = 0; i < rabbitCount; i++) {
+            rabbitsRef3.current.push(new Rabbit(30 + Math.random() * 2, 15 + Math.random() * 2, groupGoals[2]));
+          }
+        }
+      }
+      if (key === 'x') {
+        if (!xPressedRef.current) {
+          console.log("'x' key pressed")
+          xPressedRef.current = true;
+
+          for (let i = 0; i < rabbitCount; i++) {
+            rabbitsRef4.current.push(new Rabbit(10 + Math.random() * 2, 62 + Math.random() * 2, groupGoals[3]));
+          }
+        }
+      }
+      if (key === 'c') {
+        if (!cPressedRef.current) {
+          console.log("'c' key pressed")
+          cPressedRef.current = true;
+
+          for (let i = 0; i < rabbitCount; i++) {
+            rabbitsRef5.current.push(new Rabbit(110 + Math.random() * 2, 75 + Math.random() * 2, groupGoals[4]));
           }
         }
       }
@@ -154,6 +197,22 @@ function App() {
       if (key === 's') {
         console.log("'s' key released")
         sPressedRef.current = false;
+      }
+      if (key === 'a') {
+        console.log("'a' key released")
+        aPressedRef.current = false;
+      }
+      if (key === 'z') {
+        console.log("'z' key released")
+        zPressedRef.current = false;
+      }
+      if (key === 'x') {
+        console.log("'x' key released")
+        xPressedRef.current = false;
+      }
+      if (key === 'c') {
+        console.log("'c' key released")
+        cPressedRef.current = false;
       }
       if (key === 'd') {
         console.log("'d' key released")
