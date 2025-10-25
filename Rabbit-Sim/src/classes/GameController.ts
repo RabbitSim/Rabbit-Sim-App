@@ -25,7 +25,7 @@ export class GameController {
         while (!this._winnerDeclared) {
 
             this.takeTurns();
-            this.advanceTime();
+            this._time.nextTurn();
             if (this._winnerDeclared) { break; }
         }
     }
@@ -50,16 +50,7 @@ export class GameController {
         this.priority = (this.priority + 1) % n;
     }
 
-    private advanceTime(): void {
-        this._time.nextTurn();
-        if (this._time.night) {
-            console.log("The veil of night descends - the hunters move unseen.");
-        } else if (this._time.day && this._time.turnNum === 0) {
-            console.log("The sun ascends; the hunters shrink to whispers.");
-        }
-    }
-
-    // Getters and Setters
+    // Getters and Setters  
 
     get colonies(): Array<Colony> {
         return this._colonies;
