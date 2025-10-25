@@ -46,11 +46,11 @@ export class Colony {
         this._isDefeated = value;
     }
 
-    get nextAction(): Action {
+    get nextAction(): Action | null {
         return this._nextAction;
     }
 
-    set nextAction(value: Action) {
+    set nextAction(value: Action | null) {
         this._nextAction = value;
     }
 
