@@ -42,7 +42,6 @@ class GameController {
             index++;
         }
 
-
         this.priority = (this.priority + 1) % n;
     }
 

@@ -9,8 +9,9 @@ export class Colony {
     private _morale: number;
     private _isDefeated: boolean = false;
     private _foodStorage: number;
+    private _relationships: Map<Colony, number> = new Map();
 
-    private _nextAction: Action;
+    private _nextAction: Action | null = null;
 
     constructor(name: string, population: number, agriculture: number,
     military: number, energy: number, morale: number, foodStorage: number) {
@@ -30,8 +31,9 @@ export class Colony {
         this._nextAction.takeAction(this);
     }
 
-    private chooseAction(): void {
+    private chooseAction(): Action {
         //TODO: Implement action selecting algorithm
+
     }
 
     // Getters & Setters
