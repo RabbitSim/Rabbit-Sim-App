@@ -14,11 +14,13 @@ class Time {
         this.turnNum += 1;
         if (this.turnNum == 4){
             this.night = true;
+            this.day = false;
         }
         if (this.turnNum == 9){
             this.turnNum = 0;
             this.dayNum++;
             this.day = true;
+            this.night = false;
         }
     }
 }
