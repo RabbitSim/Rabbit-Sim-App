@@ -8,7 +8,7 @@ function App() {
   const [sPressed, setSPressed] = useState(false)
   const rabbitsRef = useRef<Rabbit[]>([]);
   const [, setTick] = useState(0) // force re-render each frame
-   const rabbitCount = 2;
+   const rabbitCount = 10;
   
   const RabbitMinDis = 1;
  
@@ -53,8 +53,12 @@ function App() {
       const arr = rabbitsRef.current
       for (const r of arr) {
         // call the flocking/separation step
-        r.seperateFromAlignmentCohesion(arr, RabbitMinDis);
+        r.seperateFromAlignmentCohesion(arr, RabbitMinDis, 5); // pass cluster radius (tweak as needed)
       }
+
+      // remove rabbits that finished their round-trip
+      rabbitsRef.current = rabbitsRef.current.filter(r => !r.isCompleted());
+
       // force a render so sprites are recomputed and Canvas redraws
       setTick(t => t + 1)
       raf = requestAnimationFrame(loop)
