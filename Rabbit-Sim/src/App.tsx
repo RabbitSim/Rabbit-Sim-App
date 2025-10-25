@@ -3,8 +3,10 @@ import { type Decoration, TreeSprite, RockSprite, BurrowSprite } from './classes
 import Rabbit from './classes/ui/Rabbit';
 import './App.css'
 import { useEffect, useState, useRef } from 'react'
+import Button from './components/button';
  
 function App() {
+  const [simulating, setSimulating] = useState(false)
   const [sPressed, setSPressed] = useState(false)
   const rabbitsRef = useRef<Rabbit[]>([]);
   const [, setTick] = useState(0) // force re-render each frame
@@ -139,6 +141,17 @@ function App() {
       <div>
         <h1>Rabbit Simulation</h1>
       </div>
+      <div className='buttons'>
+      {!simulating && (
+          <Button label="Start Simulation ▶" onClick={() => setSimulating(true)} />
+      ) || (
+          <Button label="Stop Simulation ■" onClick={() => setSimulating(false)} />
+      )}
+
+      <Button label="Reset Simulation ◀" onClick={() => true} />
+      </div>
+
+
       <Canvas sprites={sprites} customDraw={drawSprites} />
 
       <div className='stats'>

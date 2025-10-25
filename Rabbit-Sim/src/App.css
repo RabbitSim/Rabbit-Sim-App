@@ -44,3 +44,7 @@
 .stats {
   text-align: left;
 }
+
+.buttons {
+  margin : 0.5em 0;
+}
