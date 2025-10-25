@@ -5,6 +5,7 @@ export class Colony {
     private _military: number;
     private _energy: number;
     private _morale: number;
+    private _isDefeated: boolean = false;
 
     private _nextAction: Action;
 
