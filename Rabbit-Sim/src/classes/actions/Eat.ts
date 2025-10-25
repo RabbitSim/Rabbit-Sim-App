@@ -8,6 +8,8 @@ export class Eat implements Action {
         const food = actor.foodStorage;
         const population = actor.population;
 
+        console.log("Eating");
+
         if (food <= 0) {
             actor.foodStorage = 0;
             actor.population = 0;

@@ -1,21 +1,25 @@
 import {Colony} from "./Colony.ts"
+import {OnlySleepAndEat} from "./strategies/OnlySleepAndEat.ts";
 
-class GameController {
+export class GameController {
 
     private _colonies: Array<Colony> = [];
     private _winnerDeclared: boolean = false;
-    private _winner?: Colony;
+    // private _winner?: Colony;
     private _priority: number = 0;
 
 
-    constructor(colonies: Set<Colony>) {
-        this._colonies = colonies;
+    constructor() {
+
     }
+
 
     private gameLoop(): void {
 
         // Declare Colonies
-        //TODO: Implement colony declaration
+        this.colonies.push(
+            new Colony("number1", 100, 100, 100, 100, 99, 900, 5, new OnlySleepAndEat())
+        )
 
         while (!this._winnerDeclared) {
 
@@ -23,8 +27,6 @@ class GameController {
 
             if (this._winnerDeclared) { break; }
         }
-
-        declareWinner(this._winner);
     }
 
     private takeTurns() {
@@ -36,22 +38,12 @@ class GameController {
             if (!this.colonies[index % n].isDefeated) { // Defeated colonies do not get actions
                  this.colonies[index % n].takeAction();
 
-                 // TODO: Check if someone has won...
+                console.log(this.colonies[index % n].population);
             }
             index++;
         }
 
         this.priority = (this.priority + 1) % n;
-    }
-
-    private declareWinner(): void {
-        // TODO: Implement declareWinner
-    }
-
-    private takeActions() {
-        this._colonies.forEach((colony: Colony) => {
-            colony.takeAction();
-        });
     }
 
     // Getters and Setters
@@ -72,13 +64,6 @@ class GameController {
         this._winnerDeclared = value;
     }
 
-    get winner(): Colony {
-        return this._winner;
-    }
-
-    set winner(value: Colony) {
-        this._winner = value;
-    }
 
     get priority(): number {
         return this._priority;
@@ -86,5 +71,9 @@ class GameController {
 
     set priority(value: number) {
         this._priority = value;
+    }
+
+    public startGame(): void {
+        this.gameLoop();
     }
 }
