@@ -1,4 +1,4 @@
-class Colony {
+export class Colony {
     private _name: string;
     private _population: string;
     private _agriculture: number;
@@ -6,8 +6,11 @@ class Colony {
     private _energy: number;
     private _morale: number;
 
+    private _nextAction: Action;
+
     constructor(name: string, population: string, agriculture: number,
     military: number, energy: number, morale: number) {
+        // Attributes of each colony
         this._name = name;
         this._population = population;
         this._agriculture = agriculture;
@@ -15,6 +18,12 @@ class Colony {
         this._energy = energy;
         this._morale = morale;
     }
+
+    public takeAction(): void {
+        _nextAction.takeAction();
+    }
+
+    // Getters & Setters
 
     get name(): string {
         return this._name;
