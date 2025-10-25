@@ -11,6 +11,7 @@ import {UpgradeOffence} from "./actions/UpgradeOffence.ts";
 import weightedRandomObject from "weighted-random-object";
 import {HarvestFood} from "./actions/HarvestFood.ts";
 import {Meditate} from "./actions/Meditate.ts";
+import { ColonyMath } from './math/ColonyMath.ts';
 
 export class Colony {
     private _name: string;
@@ -89,6 +90,12 @@ export class Colony {
     private createMetrics(): ColonyMetrics {
         return new ColonyMetrics(this.population, this.agriculture, this.offence,
             this.energy, this.unrest, this.foodStorage, this.relationships, this.defence);
+    }
+
+    public modifyRelationship(otherColony: Colony, amount: number): void {
+        const currentRelationship = this._relationships.get(otherColony) ?? 0;
+        const newRelationship = currentRelationship + amount;
+        this._relationships.set(otherColony, ColonyMath.clamp(newRelationship, -100, 100));
     }
 
     // Getters & Setters

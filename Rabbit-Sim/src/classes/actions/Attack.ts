@@ -9,6 +9,9 @@ export class Attack implements IAction {
         const dEff = target.defence * ColonyMath.defenceMultiplier(target.defence);
         const power = oEff / (dEff + 1);
 
+        // deducts 15 relationship points due to aggression
+        target.modifyRelationship(actor, -15);
+
         if (power > 1.2) {
             const damage = Math.round(actor.population * 0.1 * power);
             target.population = Math.max(0, target.population - damage);
