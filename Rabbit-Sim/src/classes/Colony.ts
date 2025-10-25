@@ -6,11 +6,12 @@ export class Colony {
     private _agriculture: number;
     private _military: number;
     private _energy: number;
-    private _morale: number;
+    private _unrest: number;
     private _isDefeated: boolean = false;
     private _foodStorage: number;
+    private _relationships: Map<Colony, number> = new Map();
 
-    private _nextAction: Action;
+    private _nextAction: Action | null = null;
 
     constructor(name: string, population: number, agriculture: number,
     military: number, energy: number, morale: number, foodStorage: number) {
@@ -20,12 +21,19 @@ export class Colony {
         this._agriculture = agriculture;
         this._military = military;
         this._energy = energy;
-        this._morale = morale;
+        this._unrest = morale;
         this._foodStorage = foodStorage;
     }
 
     public takeAction(): void {
+
+        this._nextAction = this.chooseAction();
         this._nextAction.takeAction(this);
+    }
+
+    private chooseAction(): Action {
+        //TODO: Implement action selecting algorithm
+
     }
 
     // Getters & Setters
@@ -38,11 +46,11 @@ export class Colony {
         this._isDefeated = value;
     }
 
-    get nextAction(): Action {
+    get nextAction(): Action | null {
         return this._nextAction;
     }
 
-    set nextAction(value: Action) {
+    set nextAction(value: Action | null) {
         this._nextAction = value;
     }
 
@@ -86,12 +94,12 @@ export class Colony {
         this._energy = value;
     }
 
-    get morale(): number {
-        return this._morale;
+    get unrest(): number {
+        return this._unrest;
     }
 
-    set morale(value: number) {
-        this._morale = value;
+    set unrest(value: number) {
+        this._unrest = value;
     }
 
     get foodStorage(): number {
@@ -100,6 +108,14 @@ export class Colony {
 
     set foodStorage(value: number) {
         this._foodStorage = value;
+    }
+
+    get relationships(): Map<Colony, number> {
+        return this._relationships;
+    }
+
+    set relationships(value: Map<Colony, number>) {
+        this._relationships = value;
     }
 
 }

@@ -4,7 +4,7 @@ class GameController {
 
     private _colonies: Array<Colony> = [];
     private _winnerDeclared: boolean = false;
-    private _winner: Colony;
+    private _winner?: Colony;
     private _priority: number = 0;
 
 
@@ -18,15 +18,9 @@ class GameController {
         //TODO: Implement colony declaration
 
         while (!this._winnerDeclared) {
-            for (const colony of this._colonies) {
-                if (colony.isDefeated) {
-                    continue;
-                }
-                // Colonies declare their next action
-                colony.declareAction(); //TODO: Implement action declaration
-            }
 
-            this.executeActionsInTurn();
+            this.takeTurns();
+            this.logGameState();
 
             if (this._winnerDeclared) { break; }
         }
@@ -34,7 +28,7 @@ class GameController {
         declareWinner(this._winner);
     }
 
-    private executeActionsInTurn() {
+    private takeTurns() {
         let index: number = this.priority;
         const n: number = this.colonies.length;
         if (n <= 0) {return;} // No colonies!
@@ -42,6 +36,8 @@ class GameController {
         for (let i = 0; i < n; i++) {
             if (!this.colonies[index % n].isDefeated) { // Defeated colonies do not get actions
                  this.colonies[index % n].takeAction();
+
+                 // TODO: Check if someone has won...
             }
             index++;
         }
