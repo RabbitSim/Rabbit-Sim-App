@@ -26,6 +26,22 @@ export class Colony {
 
     // Getters & Setters
 
+    get isDefeated(): boolean {
+        return this._isDefeated;
+    }
+
+    set isDefeated(value: boolean) {
+        this._isDefeated = value;
+    }
+
+    get nextAction(): Action {
+        return this._nextAction;
+    }
+
+    set nextAction(value: Action) {
+        this._nextAction = value;
+    }
+
     get name(): string {
         return this._name;
     }
