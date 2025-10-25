@@ -1,4 +1,5 @@
 import type { Action } from './actions/Action'
+type SkillTiers = Record<string, number>;
 
 export class Colony {
     private _name: string;
@@ -11,6 +12,7 @@ export class Colony {
     private _foodStorage: number;
     private _relationships: Map<Colony, number> = new Map();
     private _defence: number;
+    private _tiers: SkillTiers;
 
     private _nextAction: Action | null = null;
 
@@ -25,6 +27,7 @@ export class Colony {
         this._unrest = morale;
         this._foodStorage = foodStorage;
         this._defence = defence;
+        this._tiers = {"Agriculture": 1, "Offence": 1, "Defence": 1}
     }
 
     public takeAction(): void {
