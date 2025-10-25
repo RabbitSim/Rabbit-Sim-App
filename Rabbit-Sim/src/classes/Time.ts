@@ -1,26 +1,26 @@
 class Time {
-    day : boolean
-    night : boolean
-    dayNum : number 
-    turnNum : number
+    _day : boolean
+    _night : boolean
+    _dayNum : number 
+    _turnNum : number
 
     constructor() {
-    this.day = true
-    this.night = false
-    this.dayNum = 0
-    this.turnNum = 0
+    this._day = true
+    this._night = false
+    this._dayNum = 0
+    this._turnNum = 0
     }
     nextTurn(){
-        this.turnNum += 1;
-        if (this.turnNum == 4){
-            this.night = true;
-            this.day = false;
+        this._turnNum += 1;
+        if (this._turnNum == 4){
+            this._night = true;
+            this._day = false;
         }
-        if (this.turnNum == 9){
-            this.turnNum = 0;
-            this.dayNum++;
-            this.day = true;
-            this.night = false;
+        if (this._turnNum == 9){
+            this._turnNum = 0;
+            this._dayNum++;
+            this._day = true;
+            this._night = false;
         }
     }
 }
