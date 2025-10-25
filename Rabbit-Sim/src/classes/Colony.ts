@@ -1,16 +1,19 @@
+import type { Action } from './actions/Action'
+
 export class Colony {
     private _name: string;
-    private _population: string;
+    private _population: number;
     private _agriculture: number;
     private _military: number;
     private _energy: number;
     private _morale: number;
     private _isDefeated: boolean = false;
+    private _foodStorage: number;
 
     private _nextAction: Action;
 
-    constructor(name: string, population: string, agriculture: number,
-    military: number, energy: number, morale: number) {
+    constructor(name: string, population: number, agriculture: number,
+    military: number, energy: number, morale: number, foodStorage: number) {
         // Attributes of each colony
         this._name = name;
         this._population = population;
@@ -18,10 +21,11 @@ export class Colony {
         this._military = military;
         this._energy = energy;
         this._morale = morale;
+        this._foodStorage = foodStorage;
     }
 
     public takeAction(): void {
-        _nextAction.takeAction();
+        this._nextAction.takeAction(this);
     }
 
     // Getters & Setters
@@ -50,11 +54,11 @@ export class Colony {
         this._name = value;
     }
 
-    get population(): string {
+    get population(): number {
         return this._population;
     }
 
-    set population(value: string) {
+    set population(value: number) {
         this._population = value;
     }
 
@@ -89,4 +93,13 @@ export class Colony {
     set morale(value: number) {
         this._morale = value;
     }
+
+    get foodStorage(): number {
+        return this._foodStorage;
+    }
+
+    set foodStorage(value: number) {
+        this._foodStorage = value;
+    }
+
 }
