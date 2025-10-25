@@ -2,9 +2,9 @@ class Fox {
     private _attack: number;
     private _health: number;
     
-    constructor(){
-        this._attack = 10;
-        this._health = 100;
+    constructor(attack:number = 10, health:number = 100){
+        this._attack = attack;
+        this._health = health;
     }
 
     get attack(): number {
