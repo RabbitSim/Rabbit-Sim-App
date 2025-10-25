@@ -1,32 +1,34 @@
 import React, { useRef, useEffect } from 'react'
 
-interface CanvasProps extends React.CanvasHTMLAttributes<HTMLCanvasElement> {}
-
-interface Sprite {
+export interface Sprite {
     x: number
     y: number
     color?: string
 }
 
-interface Draw {
-    (ctx: CanvasRenderingContext2D, frameCount: number, sprites?: Sprite[]): void
+export type Draw = (ctx: CanvasRenderingContext2D, frameCount: number, sprites?: Sprite[]) => void
+
+interface CanvasProps extends React.CanvasHTMLAttributes<HTMLCanvasElement> {
+    sprites?: Sprite[]
+    customDraw?: Draw
 }
 
 const Canvas: React.FC<CanvasProps> = props => {
-    
+    const { sprites, customDraw, ...rest } = props
+
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
     
-    
-    const draw: Draw = (ctx, frameCount) => {
+    const draw: Draw = (ctx, frameCount, spritesArg) => {
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
         ctx.fillStyle = '#708a39'
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
         drawGrassnoise(ctx, frameCount)
-        drawSprite(ctx, frameCount, [
-            { x: 2, y: 2, color: 'brown' },
-            { x: 60, y: 70, color: 'gray' },
-            { x: 80, y: 90, color: 'black' }
-        ]) 
+        // call external draw if provided, otherwise use internal sprite drawer
+        if (customDraw) {
+            customDraw(ctx, frameCount, spritesArg)
+        } else {
+            drawSprite(ctx, frameCount, spritesArg)
+        }
         ctx.beginPath()
         ctx.fill()
     }
@@ -113,7 +115,7 @@ const Canvas: React.FC<CanvasProps> = props => {
                 const r = Math.round(15 + n * 20 + detail * 10)
                 const b = Math.round(8 + n * 18)
 
-                const peak = Math.max(0, (detail - 0.45) * 2)
+                const peak = Math.max(0, (detail - 0.45) * 1.5)
                 const rr = Math.min(255, r + peak * 40)
                 const gg = Math.min(255, g + peak * 60)
                 const bb = Math.min(255, b + peak * 20)
@@ -179,7 +181,8 @@ const Canvas: React.FC<CanvasProps> = props => {
         
         const render = () => {
             frameCount++
-            draw(context, frameCount)
+            // pass the current sprites prop into draw so App-provided sprites are used
+            draw(context, frameCount, sprites)
             animationFrameId = window.requestAnimationFrame(render)
         }
         render()
@@ -188,9 +191,10 @@ const Canvas: React.FC<CanvasProps> = props => {
             window.cancelAnimationFrame(animationFrameId)
             window.removeEventListener('resize', setSize)
         }
-    }, [])
+    // re-run effect when sprites or customDraw change so the animation uses latest values
+    }, [sprites, customDraw])
     
-    return <canvas ref={canvasRef} style={{ imageRendering: 'pixelated' }} {...props}/>
+    return <canvas ref={canvasRef} style={{ imageRendering: 'pixelated' }} {...rest}/>
 }
 
 export default Canvas
