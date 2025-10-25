@@ -1,9 +1,9 @@
-import type { Action } from "./Action";
+import type { IAction } from "./IAction.ts";
 import type { Colony } from "../Colony";
 import { ColonyMath } from "../math/ColonyMath";
 
 // you want your rabbits mentally stable
-export class Meditate implements Action {
+export class Meditate implements IAction {
     takeAction(actor: Colony): void {
         const defenceLevel = actor.defence;
         const moraleBoost = 0.1 + 0.02 * defenceLevel;

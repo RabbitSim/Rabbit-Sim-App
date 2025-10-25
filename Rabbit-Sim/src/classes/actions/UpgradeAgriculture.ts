@@ -1,8 +1,8 @@
-import type { Action } from "./Action";
+import type { IAction } from "./IAction.ts";
 import type { Colony } from "../Colony";
 import { ColonyMath } from "../math/ColonyMath";
 
-export class UpgradeAgriculture implements Action {
+export class UpgradeAgriculture implements IAction {
     takeAction(actor: Colony): void {
         const level = actor.agriculture + 1;
         const cost = ColonyMath.upgradeCost(60, 1.33, level);

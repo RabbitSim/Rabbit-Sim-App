@@ -1,7 +1,7 @@
-import type { Action } from './Action';
+import type { IAction } from './IAction.ts';
 import { Colony } from '../Colony';
 
-export class Eat implements Action {
+export class Eat implements IAction {
     readonly name = 'Eat';
 
     takeAction(actor: Colony, target?: Colony, context?: any): void {

@@ -1,8 +1,8 @@
-import type { Action } from "./Action";
+import type { IAction } from "./IAction.ts";
 import { Colony } from "../Colony";
 import { ColonyMath } from "../math/ColonyMath";
 
-export class Sleep implements Action {
+export class Sleep implements IAction {
     takeAction(actor: Colony, target?: Colony, context?: any): void {
         actor.energy = Math.min(actor.energy * 1.2, 100);
         //rabbits look ahead at their food storage to limit how many rabbits they can feasibly support

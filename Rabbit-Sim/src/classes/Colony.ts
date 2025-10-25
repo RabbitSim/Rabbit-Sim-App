@@ -1,4 +1,4 @@
-import type {Action} from './actions/Action'
+import type {IAction} from './actions/IAction.ts'
 import type {IStrategy} from "./strategies/IStrategy.ts";
 import {ColonyMetrics} from "./ColonyMetrics.ts";
 import type {ActionNameKey} from "./actions/ActionName.ts";
@@ -9,6 +9,8 @@ import {UpgradeAgriculture} from "./actions/UpgradeAgriculture.ts";
 import {UpgradeDefence} from "./actions/UpgradeDefence.ts";
 import {UpgradeOffence} from "./actions/UpgradeOffence.ts";
 import weightedRandomObject from "weighted-random-object";
+import {HarvestFood} from "./actions/HarvestFood.ts";
+import {Meditate} from "./actions/Meditate.ts";
 
 export class Colony {
     private _name: string;
@@ -23,7 +25,7 @@ export class Colony {
     private _defence: number;
     private _strategy: IStrategy;
 
-    private _nextAction: Action | null = null;
+    private _nextAction: IAction | null = null;
 
     constructor(name: string, population: number, agriculture: number,
     offence: number, energy: number, morale: number, foodStorage: number, defence: number, strategy:IStrategy) {
@@ -45,7 +47,7 @@ export class Colony {
         this._nextAction.takeAction(this);
     }
 
-    private chooseAction() : Action {
+    private chooseAction() : IAction {
         const weights: Record<ActionNameKey, number> = this._strategy.getWeights(this.createMetrics());
 
         const myArray = [];
@@ -69,6 +71,13 @@ export class Colony {
                 case "UPGRADE_OFFENSE":
                     myArray.push({"action": new UpgradeOffence(), "weight": weights[key]});
                     break;
+                case "HARVEST_FOOD":
+                    myArray.push({"action": new HarvestFood(), "weight": weights[key]});
+                    break;
+                case "MEDITATE":
+                    myArray.push({"action": new Meditate(), "weight": weights[key]});
+                    break;
+
                 default:
                     break;
             }
@@ -92,11 +101,11 @@ export class Colony {
         this._isDefeated = value;
     }
 
-    get nextAction(): Action | null {
+    get nextAction(): IAction | null {
         return this._nextAction;
     }
 
-    set nextAction(value: Action | null) {
+    set nextAction(value: IAction | null) {
         this._nextAction = value;
     }
 
