@@ -25,7 +25,13 @@ export class Colony {
     }
 
     public takeAction(): void {
+
+        this._nextAction = this.chooseAction();
         this._nextAction.takeAction(this);
+    }
+
+    private chooseAction(): void {
+        //TODO: Implement action selecting algorithm
     }
 
     // Getters & Setters
