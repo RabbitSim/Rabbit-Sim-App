@@ -19,5 +19,18 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+      rules: {
+
+          'no-unused-vars': 'off',
+          // Use the TS rule and ignore names that start with "_"
+          '@typescript-eslint/no-unused-vars': [
+              'warn',
+              {
+                  argsIgnorePattern: '^_',
+                  varsIgnorePattern: '^_',
+                  caughtErrorsIgnorePattern: '^_',
+              },
+          ],
+      },
   },
 ])

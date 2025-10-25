@@ -1,4 +1,4 @@
-import type { Action } from "./Action";
+import type { IAction } from "./IAction.ts";
 import type { Colony } from "../Colony";
 import { ColonyMath } from "../math/ColonyMath";
 
@@ -6,7 +6,7 @@ import { ColonyMath } from "../math/ColonyMath";
  * Rabbits harvest food based on agriculture tech and population.
  * TODO possibilities: add spoilage! cbtm
  */
-export class HarvestFood implements Action {
+export class HarvestFood implements IAction {
     takeAction(actor: Colony): void {
         const agriLevel = actor.agriculture;
         const agriMult = ColonyMath.agricultureMultiplier(agriLevel);

@@ -1,12 +1,14 @@
-import type { Action } from './Action';
+import type { IAction } from './IAction.ts';
 import { Colony } from '../Colony';
 
-export class Eat implements Action {
+export class Eat implements IAction {
     readonly name = 'Eat';
 
     takeAction(actor: Colony, target?: Colony, context?: any): void {
         const food = actor.foodStorage;
         const population = actor.population;
+
+        console.log("Eating");
 
         if (food <= 0) {
             actor.foodStorage = 0;

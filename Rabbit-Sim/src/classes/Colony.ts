@@ -1,4 +1,17 @@
-import type { Action } from './actions/Action'
+import type {IAction} from './actions/IAction.ts'
+import type {IStrategy} from "./strategies/IStrategy.ts";
+import {ColonyMetrics} from "./ColonyMetrics.ts";
+import type {ActionNameKey} from "./actions/ActionName.ts";
+import {Attack} from "./actions/Attack.ts";
+import {Eat} from "./actions/Eat.ts";
+import {Sleep} from "./actions/Sleep.ts";
+import {UpgradeAgriculture} from "./actions/UpgradeAgriculture.ts";
+import {UpgradeDefence} from "./actions/UpgradeDefence.ts";
+import {UpgradeOffence} from "./actions/UpgradeOffence.ts";
+import weightedRandomObject from "weighted-random-object";
+import {HarvestFood} from "./actions/HarvestFood.ts";
+import {Meditate} from "./actions/Meditate.ts";
+import { ColonyMath } from './math/ColonyMath.ts';
 
 export class Colony {
     private _name: string;
@@ -11,11 +24,12 @@ export class Colony {
     private _foodStorage: number;
     private _relationships: Map<Colony, number> = new Map();
     private _defence: number;
+    private _strategy: IStrategy;
 
-    private _nextAction: Action | null = null;
+    private _nextAction: IAction | null = null;
 
     constructor(name: string, population: number, agriculture: number,
-    offence: number, energy: number, morale: number, foodStorage: number, defence: number) {
+    offence: number, energy: number, morale: number, foodStorage: number, defence: number, strategy:IStrategy) {
         // Attributes of each colony
         this._name = name;
         this._population = population;
@@ -25,6 +39,7 @@ export class Colony {
         this._unrest = morale;
         this._foodStorage = foodStorage;
         this._defence = defence;
+        this._strategy = strategy;
     }
 
     public takeAction(): void {
@@ -33,9 +48,54 @@ export class Colony {
         this._nextAction.takeAction(this);
     }
 
-    private chooseAction(): Action {
-        //TODO: Implement action selecting algorithm
+    private chooseAction() : IAction {
+        const weights: Record<ActionNameKey, number> = this._strategy.getWeights(this.createMetrics());
 
+        const myArray = [];
+        for (const key in weights) {
+            switch (key) {
+                case "Attack":
+                    myArray.push({"action": new Attack(), "weight": weights[key]});
+                    break;
+                case "Eat":
+                    myArray.push({"action": new Eat(), "weight": weights[key]});
+                    break;
+                case "Sleep":
+                    myArray.push({"action": new Sleep(), "weight": weights[key]});
+                    break;
+                case "UPGRADE_AGRICULTURE":
+                    myArray.push({"action": new UpgradeAgriculture(), "weight": weights[key]});
+                    break;
+                case "UPGRADE_DEFENCE":
+                    myArray.push({"action": new UpgradeDefence(), "weight": weights[key]});
+                    break;
+                case "UPGRADE_OFFENSE":
+                    myArray.push({"action": new UpgradeOffence(), "weight": weights[key]});
+                    break;
+                case "HARVEST_FOOD":
+                    myArray.push({"action": new HarvestFood(), "weight": weights[key]});
+                    break;
+                case "MEDITATE":
+                    myArray.push({"action": new Meditate(), "weight": weights[key]});
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        return weightedRandomObject(myArray).action;
+    }
+
+    private createMetrics(): ColonyMetrics {
+        return new ColonyMetrics(this.population, this.agriculture, this.offence,
+            this.energy, this.unrest, this.foodStorage, this.relationships, this.defence);
+    }
+
+    public modifyRelationship(otherColony: Colony, amount: number): void {
+        const currentRelationship = this._relationships.get(otherColony) ?? 0;
+        const newRelationship = currentRelationship + amount;
+        this._relationships.set(otherColony, ColonyMath.clamp(newRelationship, -100, 100));
     }
 
     // Getters & Setters
@@ -48,11 +108,11 @@ export class Colony {
         this._isDefeated = value;
     }
 
-    get nextAction(): Action | null {
+    get nextAction(): IAction | null {
         return this._nextAction;
     }
 
-    set nextAction(value: Action | null) {
+    set nextAction(value: IAction | null) {
         this._nextAction = value;
     }
 
@@ -130,5 +190,13 @@ export class Colony {
 
     set defence(value: number) {
         this._defence = value;
+    }
+
+    get strategy(): IStrategy {
+        return this._strategy;
+    }
+
+    set strategy(value: IStrategy) {
+        this._strategy = value;
     }
 }
