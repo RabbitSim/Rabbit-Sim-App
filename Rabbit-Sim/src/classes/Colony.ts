@@ -2,7 +2,7 @@ import type { Action } from './actions/Action'
 
 export class Colony {
     private _name: string;
-    private _population: string;
+    private _population: number;
     private _agriculture: number;
     private _military: number;
     private _energy: number;
@@ -12,7 +12,7 @@ export class Colony {
 
     private _nextAction: Action;
 
-    constructor(name: string, population: string, agriculture: number,
+    constructor(name: string, population: number, agriculture: number,
     military: number, energy: number, morale: number, foodStorage: number) {
         // Attributes of each colony
         this._name = name;
@@ -54,11 +54,11 @@ export class Colony {
         this._name = value;
     }
 
-    get population(): string {
+    get population(): number {
         return this._population;
     }
 
-    set population(value: string) {
+    set population(value: number) {
         this._population = value;
     }
 
