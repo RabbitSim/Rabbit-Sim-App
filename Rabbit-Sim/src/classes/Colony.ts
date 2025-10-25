@@ -10,11 +10,12 @@ export class Colony {
     private _isDefeated: boolean = false;
     private _foodStorage: number;
     private _relationships: Map<Colony, number> = new Map();
+    private _defence: number;
 
     private _nextAction: Action | null = null;
 
     constructor(name: string, population: number, agriculture: number,
-    military: number, energy: number, morale: number, foodStorage: number) {
+    military: number, energy: number, morale: number, foodStorage: number, defence: number) {
         // Attributes of each colony
         this._name = name;
         this._population = population;
@@ -23,6 +24,7 @@ export class Colony {
         this._energy = energy;
         this._unrest = morale;
         this._foodStorage = foodStorage;
+        this._defence = defence;
     }
 
     public takeAction(): void {
@@ -118,4 +120,11 @@ export class Colony {
         this._relationships = value;
     }
 
+    get defence(): number {
+        return this._defence;
+    }
+
+    set defence(value: number) {
+        this._defence = value;
+    }
 }
