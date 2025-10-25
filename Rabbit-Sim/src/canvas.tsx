@@ -2,8 +2,14 @@ import React, { useRef, useEffect } from 'react'
 
 interface CanvasProps extends React.CanvasHTMLAttributes<HTMLCanvasElement> {}
 
+interface Sprite {
+    x: number
+    y: number
+    color?: string
+}
+
 interface Draw {
-    (ctx: CanvasRenderingContext2D, frameCount: number): void
+    (ctx: CanvasRenderingContext2D, frameCount: number, sprites?: Sprite[]): void
 }
 
 const Canvas: React.FC<CanvasProps> = props => {
@@ -16,6 +22,11 @@ const Canvas: React.FC<CanvasProps> = props => {
         ctx.fillStyle = '#708a39'
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
         drawGrassnoise(ctx, frameCount)
+        drawSprite(ctx, frameCount, [
+            { x: 2, y: 2, color: 'brown' },
+            { x: 60, y: 70, color: 'gray' },
+            { x: 80, y: 90, color: 'black' }
+        ]) 
         ctx.beginPath()
         ctx.fill()
     }
@@ -77,41 +88,70 @@ const Canvas: React.FC<CanvasProps> = props => {
         const img = ctx.createImageData(w, h)
         const d = img.data
 
-        // tweak these to taste
-        const baseScale = 0.02
+        // changed code: render noise at a lower "pixel" resolution then expand each noise pixel
+        const pixelSize = 2 // increase this to make each noise "pixel" larger
+        const baseScale = 0.5
         const octaves = 5
         const persistence = 0.5
         const lacunarity = 2
         const wind = frameCount * 0.0025
 
-        for (let y = 0; y < h; y++) {
-            for (let x = 0; x < w; x++) {
-                const idx = (y * w + x) * 4
-                // base terrain + fine blades
-                const n = octaveNoise(x + 400, y + 400 + wind, octaves, lacunarity, persistence, baseScale)
-                const detail = octaveNoise(x, y + wind * 0.6, 2, 2, 0.6, baseScale * 4)
+        const smallW = Math.ceil(w / pixelSize)
+        const smallH = Math.ceil(h / pixelSize)
 
-                // map to grassy color
-                const g = Math.round(90 + n * 140 + detail * 30) // main green
-                const r = Math.round(15 + n * 20 + detail * 10)  // slight warm tint
-                const b = Math.round(8 + n * 18)                 // low blue
+        // compute each small cell and write it as a block into the full image data
+        for (let sy = 0; sy < smallH; sy++) {
+            for (let sx = 0; sx < smallW; sx++) {
+                // sample in the middle of the cell for smoother results
+                const sampleX = sx * pixelSize + pixelSize / 2
+                const sampleY = sy * pixelSize + pixelSize / 2
 
-                // subtle highlights for blade crests
+                const n = octaveNoise(sampleX + 400, sampleY + 400 + wind, octaves, lacunarity, persistence, baseScale)
+                const detail = octaveNoise(sampleX, sampleY + wind * 0.6, 2, 2, 0.6, baseScale * 4)
+
+                const g = Math.round(90 + n * 140 + detail * 30)
+                const r = Math.round(15 + n * 20 + detail * 10)
+                const b = Math.round(8 + n * 18)
+
                 const peak = Math.max(0, (detail - 0.45) * 2)
                 const rr = Math.min(255, r + peak * 40)
                 const gg = Math.min(255, g + peak * 60)
                 const bb = Math.min(255, b + peak * 20)
 
-                d[idx + 0] = rr
-                d[idx + 1] = gg
-                d[idx + 2] = bb
-                d[idx + 3] = 255
+                // fill the pixelSize x pixelSize block
+                for (let dy = 0; dy < pixelSize; dy++) {
+                    const py = sy * pixelSize + dy
+                    if (py >= h) continue
+                    for (let dx = 0; dx < pixelSize; dx++) {
+                        const px = sx * pixelSize + dx
+                        if (px >= w) continue
+                        const idx = (py * w + px) * 4
+                        d[idx + 0] = rr
+                        d[idx + 1] = gg
+                        d[idx + 2] = bb
+                        d[idx + 3] = 255
+                    }
+                }
             }
         }
 
         ctx.putImageData(img, 0, 0)
+        // ensure canvas scaling stays pixelated
+        ctx.imageSmoothingEnabled = false
     }
 
+    const drawSprite: Draw = (ctx, frameCount, sprites) => {
+        ctx.save()
+        if (!sprites || !Array.isArray(sprites)) {
+            ctx.restore()
+            return
+        }
+        for (const sprite of sprites) {
+            ctx.fillStyle = sprite.color || 'brown'
+            ctx.fillRect(sprite.x, sprite.y, 1, 1)
+        }
+        ctx.restore()
+    }
 
     useEffect(() => {
         
