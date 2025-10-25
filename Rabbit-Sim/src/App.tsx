@@ -228,8 +228,6 @@ function App() {
         if (dayNumParam === undefined) return color
         if (color === undefined) return color
 
-        // scale color darkness based on dayNum: 4 dim, 5 dark, 6 darker, 7 darkest, 8 dark, 9 dim
-        // only handle 6-digit hex colors here; other formats are returned unchanged
         if (!/^#([0-9a-fA-F]{6})$/.test(color)) return color
 
         // mapping of day -> multiplier (lower = darker)
