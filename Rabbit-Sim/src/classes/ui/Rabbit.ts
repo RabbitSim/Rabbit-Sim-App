@@ -10,6 +10,7 @@ export default class Rabbit {
     speed: number;      // units per frame
     maxSpeed: number;   // optional cap
     reachedGoal: boolean;
+    completed: boolean; // <-- added
 
     constructor(x: number, y: number, goal : { x: number; y: number }) {
         this.x = x;
@@ -23,6 +24,7 @@ export default class Rabbit {
         this.speed = 0.25;    // smaller = slower
         this.maxSpeed = 1.0;
         this.reachedGoal = false;
+        this.completed = false; // <-- initialized
 
         const randByte = () => 230 + Math.floor(Math.random() * 26);
         const toHex = (n: number) => n.toString(16).padStart(2, '0');
@@ -44,19 +46,25 @@ export default class Rabbit {
     }
     
     setGoal(goal: { x: number; y: number }) {
+        // update stored goal so other logic sees the change
+        this.goalX = goal.x;
+        this.goalY = goal.y;
         this.directionVec = { x: goal.x - this.x, y: goal.y - this.y };
     }
 
-    seperateFromAlignmentCohesion(other: Rabbit[], minDistance: number) {
+    // add a small public getter so external code can remove rabbits
+    isCompleted() {
+        return this.completed;
+    }
 
-        // if near goal the chenge direction to head back to start
+    seperateFromAlignmentCohesion(other: Rabbit[], minDistance: number, clusterRadius = 5) {
+
+        // if near goal then change direction to head back to start
         const goalDistX = this.goalX - this.x;
         const goalDistY = this.goalY - this.y;
         const goalDistSq = goalDistX * goalDistX + goalDistY * goalDistY;
-        // console.log("Goal distance squared: " + goalDistSq);
         if (goalDistSq < 25) { // within 5 units of goal
             this.setGoal({ x: this.startX, y: this.startY });
-            // console.log("Changing goal to start");
             this.reachedGoal = true;
         }
 
@@ -64,8 +72,21 @@ export default class Rabbit {
             const startDistX = this.startX - this.x;
             const startDistY = this.startY - this.y;
             const startDistSq = startDistX * startDistX + startDistY * startDistY;
-            if (startDistSq < 25) { // within 5 units of start
-                this.setGoal({ x: this.goalX, y: this.goalY });
+            if (startDistSq < clusterRadius * clusterRadius) { // within clusterRadius units of start
+                // mark completed so the app can remove this rabbit
+                this.completed = true;
+
+                // also mark nearby rabbits in the cluster as completed
+                for (const o of other) {
+                    if (o === this) continue;
+                    const dx = this.x - o.x;
+                    const dy = this.y - o.y;
+                    if (dx * dx + dy * dy <= clusterRadius * clusterRadius) {
+                        o.completed = true;
+                    }
+                }
+
+                return; // stop further updates for this rabbit this frame
             }
         }
 
@@ -76,8 +97,8 @@ export default class Rabbit {
         if (dirToGoalMag > 0) {
             const normDirToGoalX = dirToGoalX / dirToGoalMag;
             const normDirToGoalY = dirToGoalY / dirToGoalMag;
-            this.directionVec.x += normDirToGoalX * 0.05;
-            this.directionVec.y += normDirToGoalY * 0.05;
+            this.directionVec.x += normDirToGoalX * 0.1;
+            this.directionVec.y += normDirToGoalY * 0.1;
         }
 
         let moveX = 0;
