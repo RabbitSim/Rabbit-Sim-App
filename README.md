@@ -5,3 +5,6 @@
 ## Members
 
 Fraser Levack
+Lewis Tough
+Luke Latta
+Zhen Yao Heng
