@@ -143,7 +143,30 @@ export class GameController {
     }
 
     public startGame(): void {
+        //Prevent rerunning a finished game
+        if (this._winnerDeclared) {
+            console.warn("Game already finished. Call resetGame() to start a new one.");
+            return;
+        }
+
+        //Also guard against double-starts
+        if (this._colonies.length > 0 && this._turn > 0) {
+            console.warn("Game already in progress. Ignoring start request.");
+            return;
+        }
+
         this.gameLoop();
+    }
+
+    public resetGame(): void {
+        this._colonies = [];
+        this._winnerDeclared = false;
+        this._winner = undefined;
+        this._priority = 0;
+        this._turn = 0;
+        this._logger = new Logger(); // fresh log
+        this._time = new Time();
+        console.log("Game has been reset. Ready to run again.");
     }
 
     get logger(): Logger {
