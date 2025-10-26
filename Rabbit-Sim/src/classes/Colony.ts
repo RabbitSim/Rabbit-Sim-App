@@ -130,9 +130,19 @@ export class Colony {
             } else if (energy < 60) {
                 if (k === "Sleep") multiplier *= 1.5;
             }// don't need that honk sho me me me me ... no more
-            if (energy > 90) {
-                if (k === "Sleep") multiplier *= 0.2;
+            else if (energy > 90) {
+                if (k === "Sleep") multiplier *= 0.2; // locked in
+                // whos gonna carry the boats
+                if (k === "Attack") multiplier *= 2.5;
+                if (k.startsWith("UPGRADE_")) multiplier *= 2.0;
+                if (k === "HARVEST_FOOD") multiplier *= 1.5;
             }
+            else if (energy > 75) {
+                if (k === "Attack") multiplier *= 1.5;
+                if (k.startsWith("UPGRADE_")) multiplier *= 1.3;
+                if (k === "HARVEST_FOOD") multiplier *= 1.2;
+            }
+
             // total mental breakdown iminant
             if (unrest > 0.9) {
                 if (k === "MEDITATE") multiplier *= 4;
