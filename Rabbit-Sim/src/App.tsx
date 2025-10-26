@@ -1037,9 +1037,9 @@ const sudoColonyRefs = useRef<sudoColony[]>([
         <Button label="Reset Simulation ◀" onClick={handleRun} disabled={running} />
       </div>
 
-      <div>
+      {/* <div>
         TurnTaking Status: {takingTurn ? "True" : "False"}
-      </div>
+      </div> */}
 
       <Canvas sprites={sprites} customDraw={drawSprites} dayNum={dayNum} />
 
