@@ -459,10 +459,6 @@ function App() {
       <Button label="Reset Simulation ◀" onClick={() => true} />
       </div>
 
-      {/* The Canvas component will re-render because `sprites` is a new array 
-        each frame (which is intended, as it contains dynamic rabbit positions).
-        `customDraw` is stable thanks to useCallback.
-      */}
       <Canvas sprites={sprites} customDraw={drawSprites} dayNum={dayNum} />
 
       <div className='stats'>
