@@ -13,6 +13,7 @@ export class GameController {
     private _logger: Logger = new Logger();
     private _turn: number = 0;
     private _time: Time;
+    private _winner?: Colony;
 
 
     constructor() {
@@ -38,7 +39,12 @@ export class GameController {
         while (!this._winnerDeclared) {
             this.takeTurns();
             this._time.nextTurn();
+            this.checkWinner();
             if (this._winnerDeclared) { break; }
+        }
+        if (this._winner) {
+            console.log(` ${this._winner.name} has popped off all and rules the warren!`);
+            console.log(this.logger.toJSON());
         }
 
         // Do something with the log here
@@ -73,6 +79,33 @@ export class GameController {
         }
 
         this.priority = (this.priority + 1) % n;
+    }
+
+
+
+    
+    /**
+     * Check victory conditions and mark defeated colonies.
+     */
+    private checkWinner(): void {
+        // Mark dead colonies as defeated
+        for (const colony of this.colonies) {
+            if (colony.population <= 0 && !colony.isDefeated) {
+                colony.isDefeated = true;
+                console.log(`${colony.name} has been wiped out!`);
+            }
+        }
+
+        const alive = this.colonies.filter(c => !c.isDefeated);
+
+        if (alive.length === 1) {
+            this._winnerDeclared = true;
+            this._winner = alive[0];
+        } else if (alive.length === 0) {
+            // everyone dead = mutual extinction
+            this._winnerDeclared = true;
+            this._winner = undefined;
+        }
     }
 
     // Getters and Setters  
