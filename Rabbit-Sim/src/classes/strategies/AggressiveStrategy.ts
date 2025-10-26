@@ -10,11 +10,11 @@ export class AggressiveStrategy implements IStrategy {
             Attack: 40,
             Eat: 20,
             Sleep: 10,
-            UPGRADE_AGRICULTURE: 0,
-            UPGRADE_DEFENCE: 0,
-            UPGRADE_OFFENSE: 20,
-            HARVEST_FOOD: 10,
-            MEDITATE: 0,
+            UPGRADE_AGRICULTURE: 5,
+            UPGRADE_DEFENCE: 5,
+            UPGRADE_OFFENSE: 40,
+            HARVEST_FOOD: 20,
+            MEDITATE: 5,
         };
     }
 

@@ -180,4 +180,7 @@ export class GameController {
     set turn(value: number) {
         this._turn = value;
     }
+    get winner(): Colony | undefined {
+        return this._winner;
+    }
 }
