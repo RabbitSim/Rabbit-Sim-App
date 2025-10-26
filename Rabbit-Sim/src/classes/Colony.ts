@@ -10,6 +10,7 @@ import {UpgradeDefence} from "./actions/UpgradeDefence.ts";
 import {UpgradeOffence} from "./actions/UpgradeOffence.ts";
 import {HarvestFood} from "./actions/HarvestFood.ts";
 import {Meditate} from "./actions/Meditate.ts";
+import { ColonyMath } from './math/ColonyMath.ts';
 
 import weightedRandomObject from "weighted-random-object";
 
@@ -113,6 +114,12 @@ export class Colony {
             isDefeated: this._isDefeated,
             strategy: this._strategy,
         };
+    }
+
+    public modifyRelationship(otherColony: Colony, amount: number): void {
+        const currentRelationship = this._relationships.get(otherColony) ?? 0;
+        const newRelationship = currentRelationship + amount;
+        this._relationships.set(otherColony, ColonyMath.clamp(newRelationship, -100, 100));
     }
 
     // Getters & Setters
