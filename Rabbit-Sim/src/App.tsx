@@ -10,6 +10,14 @@ import Button from './components/Button';
 import { GameController } from "./classes/GameController";
 import { JSONInterpreter } from './classes/jsonInterpreter';
 
+interface sudoColony {
+  id: number;
+  name: string;
+  population: number;
+  food: number;
+  isDefeated: boolean;
+  strategy: string;
+}
 
 // --- Constants ---
 
@@ -74,6 +82,48 @@ function App() {
 
   
   const [dayNum, setDayNum] = useState<number>(0)
+  const sudoColonyRefs = useRef<sudoColony[]>([
+    {
+      id: 1,
+      name: "Colony 1",
+      population: 0,
+      food: 0,
+      isDefeated: true,
+      strategy: ''
+    },
+    {
+      id: 2,
+      name: "Colony 2",
+      population: 0,
+      food: 0,
+      isDefeated: true,
+      strategy: ''
+    },
+    {
+      id: 3,
+      name: "Colony 3",
+      population: 0,
+      food: 0,
+      isDefeated: true,
+      strategy: ''
+    },
+    {
+      id: 4,
+      name: "Colony 4",
+      population: 0,
+      food: 0,
+      isDefeated: true,
+      strategy: ''
+    },
+    {
+      id: 5,
+      name: "Colony 5",
+      population: 0,
+      food: 0,
+      isDefeated: true,
+      strategy: ''
+    }
+  ]);
   const rabbitsRef1 = useRef<Rabbit[]>([]);
   const rabbitsRef2 = useRef<Rabbit[]>([]);
   const rabbitsRef3 = useRef<Rabbit[]>([]);
@@ -295,7 +345,7 @@ function App() {
         try {
             // startGame may return void or a Promise; treat the return as unknown and
             // detect a Promise at runtime to handle async completion.
-            controller.startGame() as unknown;
+            controller.startGame();
             // handle async startGame if it returns a Promise
                 setRunning(false);
                 console.log("----------------------------------------------------------------------------");
@@ -303,6 +353,7 @@ function App() {
                 console.log("----------------------------------------------------------------------------");
 
                 const theJSON = controller.logger.toJSON();
+                console.log("JSON log:", theJSON);
                 const interpreter = new JSONInterpreter();
                 const success = interpreter.interpret(theJSON);
                 if (success) {
@@ -311,14 +362,132 @@ function App() {
                     console.error("Failed to interpret JSON log.");
                     return;
                 }
+
+                const initialState = interpreter.getInitialState();
+                handleInitialize(JSON.stringify(initialState));
+                console.log("Initial State:", initialState);
+                let turnNum = 0;
+                while (interpreter.hasMoreTurns()) {
+                    const turn = interpreter.getNextTurn();
+                    console.log(`Turn ${turnNum}:`, turn);
+                    turnNum++;
+                }
+
         } catch (err) {
             console.error(err);
             setRunning(false);
         }
     };
+
+  const handleInitialize = (initState: string): void => {
+    try {
+      const parsed = JSON.parse(initState)
+      if (!Array.isArray(parsed)) {
+        console.error('Initial state must be a JSON array')
+        return
+      }
+
+      const mapped = parsed.map((c: any, idx: number) => ({
+        id: typeof c.id === 'number' ? c.id : idx,
+        name: typeof c.name === 'string' ? c.name : `Colony ${idx + 1}`,
+        population: typeof c.population === 'number' ? c.population : 0,
+        food: typeof c.food === 'number' ? c.food : 0,
+        isDefeated: !!c.isDefeated,
+        strategy: typeof c.strategy === 'string' ? c.strategy : ''
+      } as sudoColony))
+
+      // Ensure we have exactly 5 entries (pad or truncate)
+      const desired = 5
+      const padded = mapped.slice(0, desired)
+      while (padded.length < desired) {
+        const i = padded.length
+        padded.push({
+          id: i,
+          name: `Colony ${i + 1}`,
+          population: 0,
+          food: 0,
+          isDefeated: true,
+          strategy: ''
+        })
+      }
+
+      sudoColonyRefs.current = padded
+      // force UI update
+      setTick(t => t + 1)
+      console.log('sudoColonyRefs initialized:', sudoColonyRefs.current)
+
+      // If simulation currently running, apply the new colony state into active entities
+      if (simulating) {
+        applyColoniesToSimulation(sudoColonyRefs.current)
+      }
+    } catch (err) {
+      console.error('Failed to parse initial state JSON:', err)
+    }
+  }
+
+  // apply the sudoColony array into the running simulation (spawn/clear rabbits, sync storages)
+  const applyColoniesToSimulation = (colonies: sudoColony[]) => {
+    const groupsRefs = [rabbitsRef1, rabbitsRef2, rabbitsRef3, rabbitsRef4, rabbitsRef5]
+    const colors = ['#ffffff','#ff69b4','#50c2e7ff','#bbbb10ff','#808080']
+    const spawns = [{ x: 100, y: 10 }, { x: 60, y: 30 }, { x: 10, y: 12 }, { x: 20, y: 45 }, { x: 110, y: 50 }]
+
+    for (let i = 0; i < 5; i++) {
+      const col = colonies[i]
+      const ref = groupsRefs[i]
+      if (!col || !ref) continue
+
+      // If colony defeated, clear rabbits for that group
+      if (col.isDefeated) {
+        ref.current = []
+        continue
+      }
+
+      // Heuristic: spawn one rabbit per 10 population (cap to avoid runaway)
+      const desiredCount = Math.min(200, Math.max(0, Math.floor(col.population / 10)))
+
+      // Add rabbits until desired
+      while (ref.current.length < desiredCount) {
+        ref.current.push(new Rabbit(spawns[i].x + Math.random() * 2, spawns[i].y + Math.random() * 2, groupFoodCollectionGoals[i], colors[i]))
+      }
+      // Trim extras
+      if (ref.current.length > desiredCount) ref.current.length = desiredCount
+    }
+
+    // Try to sync food into FoodStorage objects if they expose methods/properties
+    for (let i = 0; i < foodStorageRef.current.length; i++) {
+      const fs = foodStorageRef.current[i] as any
+      const col = colonies[i]
+      if (!fs || !col) continue
+
+      // prefer using well-known methods if available
+      if (typeof fs.getStored === 'function' && typeof fs.storeFood === 'function' && typeof fs.retrieveFood === 'function') {
+        const current = fs.getStored() || 0
+        const delta = col.food - current
+        if (delta > 0) fs.storeFood(delta)
+        else if (delta < 0) fs.retrieveFood(-delta)
+      } else if (typeof fs.stored === 'number') {
+        // fallback: set stored property if present
+        fs.stored = col.food
+      } else if (typeof fs.height === 'number') {
+        // fallback visual mapping: set height based on food
+        fs.height = Math.min(10, Math.max(0, Math.floor(col.food / 100)))
+      }
+    }
+
+    // force UI update after applying
+    setTick(t => t + 1)
+    console.log('Applied colonies to running simulation')
+  }
+
+  // When simulation starts, make sure current sudoColony state is applied
+  useEffect(() => {
+    if (simulating) {
+      applyColoniesToSimulation(sudoColonyRefs.current)
+    }
+  }, [simulating])
  
   // animation loop: call behavior update for each rabbit every frame
-  useEffect(() => {
+  useEffect(() => {``
     let raf = 0;
     const loop = () => {
       if (simulating) {

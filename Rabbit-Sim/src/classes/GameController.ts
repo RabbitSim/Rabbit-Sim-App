@@ -27,6 +27,12 @@ export class GameController {
     private gameLoop(): void {
 
         // Recording initial state
+        // Declare Colonies
+        this.colonies.push(
+            new Colony("number1", 100, 100, 100, 100, 99, 900, 5, new OnlySleepAndEat()),
+            new Colony("number2", 100, 100, 100, 100, 99, 900, 5, new OnlySleepAndEat())
+        )
+
         const colonyStates: ColonyState[] = this.getColonyStates();
         this.logger.recordInitial(colonyStates);
 
@@ -148,7 +154,7 @@ export class GameController {
             return;
         }
 
-        this.gameLoop();
+        return this.gameLoop();
     }
 
     public resetGame(): void {
