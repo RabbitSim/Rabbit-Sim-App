@@ -1,6 +1,7 @@
 import Canvas, { type Sprite, type Draw } from './canvas';
 import { type Decoration, TreeSprite, RockSprite, BurrowSprite } from './classes/ui/Decorations';
 import Rabbit from './classes/ui/Rabbit';
+import Fox from './classes/ui/Fox';
 import DeadRabbit from './classes/ui/DeadRabbit';
 import FoodStorage from './classes/ui/FoodStorage';
 import './App.css'
@@ -18,6 +19,7 @@ const burrowPositions = [{ x: 100, y: 30 }, { x: 60, y: 40 }, { x: 30, y: 15 }, 
 
 const rabbitCount = 10;
 const RabbitMinDis = 1;
+
 
 // --- Helper Function (Moved outside component) ---
 
@@ -59,11 +61,17 @@ function App() {
   const threePressedRef = useRef<boolean>(false)
   const ePressedRef = useRef<boolean>(false)
   const nPressedRef = useRef<boolean>(false)
+
+  //Foxes
+  const fPressedRef = useRef<boolean>(false);
+  const kPressedRef = useRef<boolean>(false);
+
   
   const [dayNum, setDayNum] = useState<number>(0)
   const rabbitsRef = useRef<Rabbit[]>([]);
   const deadRabbitsRef = useRef<DeadRabbit[]>([]);
   const foodStorageRef = useRef<FoodStorage[]>([]);
+  const foxesRef = useRef<Fox[]>([]);
   const [, setTick] = useState(0) // force re-render each frame
  
   useEffect(() => {
@@ -115,6 +123,25 @@ function App() {
           }
         }
       }
+      if (key === 'f') {
+        if (!fPressedRef.current) {
+          console.log("'f' key pressed");
+          fPressedRef.current = true;
+
+          // Spawn a fox near the central spawn for rabbits
+          foxesRef.current.push(new Fox(60 + Math.random() * 2, 40 + Math.random() * 2));
+        }
+      }
+      if (key === 'k') {
+        if (!kPressedRef.current) {
+          console.log("'k' key pressed");
+          kPressedRef.current = true;
+
+          // Remove all foxes
+          foxesRef.current = [];
+        }
+      }
+
       if (key === 'n') {
         if (!nPressedRef.current) {
           console.log("'n' key pressed")
@@ -149,6 +176,15 @@ function App() {
         console.log("'e' key released")
         ePressedRef.current = false;
       }
+      if (key === 'f') {
+        console.log("'f' key released");
+        fPressedRef.current = false;
+      }
+      if (key === 'k') {
+        console.log("'k' key released");
+        kPressedRef.current = false;
+      }
+
       if (key === 'n') {
         console.log("'n' key released")
         nPressedRef.current = false;
@@ -165,33 +201,55 @@ function App() {
  
   // animation loop: call behavior update for each rabbit every frame
   useEffect(() => {
-    let raf = 0
+    let raf = 0;
     const loop = () => {
-      // This logic will run only if simulating
       if (simulating) {
-        const arr = rabbitsRef.current
+        // 1) Rabbits move
+        const arr = rabbitsRef.current;
         for (const r of arr) {
-          // call the flocking/separation step
           r.seperateFromAlignmentCohesion(arr, RabbitMinDis, 5);
         }
 
-        // remove rabbits that finished their round-trip
+        // 2) Foxes hunt (NEW)
+        if (foxesRef.current.length > 0 && rabbitsRef.current.length > 0) {
+          const killedThisFrame: Rabbit[] = [];
+
+          const worldW = Math.floor(window.innerWidth * 0.2);
+          const worldH = Math.floor(window.innerHeight * 0.2);
+
+          for (const fox of foxesRef.current) {
+            // pass all rabbits and all foxes for separation
+            const killed = fox.update(rabbitsRef.current, foxesRef.current, worldW, worldH);
+            if (killed && killed.length) killedThisFrame.push(...killed);
+          }
+
+          // Convert killed rabbits to DeadRabbit immediately
+          if (killedThisFrame.length) {
+            for (const r of killedThisFrame) {
+              deadRabbitsRef.current.push(new DeadRabbit(r.x, r.y, 100));
+            }
+            // Remove completed/killed rabbits right away
+            const deadSet = new Set(killedThisFrame);
+            rabbitsRef.current = rabbitsRef.current.filter(r => !deadSet.has(r) && !r.isCompleted());
+          }
+        }
+
+        // 3) Remove rabbits that finished round-trip (existing)
         rabbitsRef.current = rabbitsRef.current.filter(r => !r.isCompleted());
 
-        // reduce lifetime of dead rabbits and remove expired ones
-        for (const dr of deadRabbitsRef.current) {
-          dr.decreaseLifetime();
-        }
+        // 4) Decay dead rabbits (existing)
+        for (const dr of deadRabbitsRef.current) dr.decreaseLifetime();
         deadRabbitsRef.current = deadRabbitsRef.current.filter(dr => !dr.isExpired());
 
-        // force a render so sprites are recomputed and Canvas redraws
-        setTick(t => t + 1)
+        // Trigger re-render
+        setTick(t => t + 1);
       }
-      raf = requestAnimationFrame(loop)
-    }
-    raf = requestAnimationFrame(loop)
-    return () => cancelAnimationFrame(raf)
-  }, [simulating]) // Re-run if `simulating` changes (though loop checks it internally)
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [simulating]);
+
  
   // add the food storage units next to each burrow to the right (initialize once)
   useEffect(() => {
@@ -201,6 +259,12 @@ function App() {
   }, []); // Empty deps, runs once
   
   // --- Memoized Static Sprites (Calculated Once) ---
+
+  const foxSprites: Sprite[] = foxesRef.current.map(f => ({
+    x: f.x,
+    y: f.y,
+    color: f.color, // Fox has its own orange palette
+  }));
 
   const staticBurrowSprites = useMemo(() => {
     const sprites: Sprite[] = [];
@@ -279,6 +343,7 @@ function App() {
     ...foodStorageSprites,
     ...staticRockSprites,
     ...rabbitsprites,
+    ...foxSprites,
     ...staticTreeSprites
   ];
  
