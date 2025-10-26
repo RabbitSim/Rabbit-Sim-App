@@ -10,9 +10,9 @@ export default class Rabbit {
     speed: number;      // units per frame
     maxSpeed: number;   // optional cap
     reachedGoal: boolean;
-    completed: boolean; // <-- added
+    completed: boolean;
 
-    constructor(x: number, y: number, goal : { x: number; y: number }) {
+    constructor(x: number, y: number, goal : { x: number; y: number }, color?: string) {
         this.x = x;
         this.y = y;
         this.startX = x;
@@ -24,12 +24,21 @@ export default class Rabbit {
         this.speed = 0.25;    // smaller = slower
         this.maxSpeed = 1.0;
         this.reachedGoal = false;
-        this.completed = false; // <-- initialized
+        this.completed = false; 
 
-        const randByte = () => 230 + Math.floor(Math.random() * 26);
         const toHex = (n: number) => n.toString(16).padStart(2, '0');
-        const r = randByte(), g = randByte(), b = randByte();
-        this.color = `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+        const clamp = (v: number) => Math.max(0, Math.min(255, Math.round(v)));
+
+        if (color) {
+            this.color = color;
+        } else {
+            // random brownish color
+            const r = clamp(139 + Math.random() * 50);
+            const g = clamp(69 + Math.random() * 30);
+            const b = clamp(19 + Math.random() * 10);
+            this.color = `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+        }
+        
     }
 
     move(dx: number, dy: number) {

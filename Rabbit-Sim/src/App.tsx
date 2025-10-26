@@ -98,7 +98,8 @@ function App() {
           sPressedRef.current = true;
 
           for (let i = 0; i < rabbitCount; i++) {
-            rabbitsRef1.current.push(new Rabbit(100 + Math.random() * 2, 30 + Math.random() * 2, groupGoals[0]));
+            // white colored rabbits for this group
+            rabbitsRef1.current.push(new Rabbit(100 + Math.random() * 2, 30 + Math.random() * 2, groupGoals[0], '#ffffff'));
           }
         }
       }
@@ -108,7 +109,8 @@ function App() {
           aPressedRef.current = true;
 
           for (let i = 0; i < rabbitCount; i++) {
-            rabbitsRef2.current.push(new Rabbit(60 + Math.random() * 2, 40 + Math.random() * 2, groupGoals[1]));
+            // Pink colored rabbits for this group
+            rabbitsRef2.current.push(new Rabbit(60 + Math.random() * 2, 40 + Math.random() * 2, groupGoals[1], '#ff69b4'));
           }
         }
       }
@@ -118,7 +120,8 @@ function App() {
           zPressedRef.current = true;
 
           for (let i = 0; i < rabbitCount; i++) {
-            rabbitsRef3.current.push(new Rabbit(30 + Math.random() * 2, 15 + Math.random() * 2, groupGoals[2]));
+            // light blue colored rabbits for this group
+            rabbitsRef3.current.push(new Rabbit(30 + Math.random() * 2, 15 + Math.random() * 2, groupGoals[2], '#50c2e7ff'));
           }
         }
       }
@@ -128,7 +131,8 @@ function App() {
           xPressedRef.current = true;
 
           for (let i = 0; i < rabbitCount; i++) {
-            rabbitsRef4.current.push(new Rabbit(10 + Math.random() * 2, 62 + Math.random() * 2, groupGoals[3]));
+            // light purple colored rabbits for this group
+            rabbitsRef4.current.push(new Rabbit(10 + Math.random() * 2, 62 + Math.random() * 2, groupGoals[3], '#bbbb10ff'));
           }
         }
       }
@@ -138,7 +142,8 @@ function App() {
           cPressedRef.current = true;
 
           for (let i = 0; i < rabbitCount; i++) {
-            rabbitsRef5.current.push(new Rabbit(110 + Math.random() * 2, 75 + Math.random() * 2, groupGoals[4]));
+            // grey colored rabbits for this group
+            rabbitsRef5.current.push(new Rabbit(110 + Math.random() * 2, 75 + Math.random() * 2, groupGoals[4], '#808080'));
           }
         }
       }
@@ -254,13 +259,11 @@ function App() {
           rabbitsRef5.current
         ];
 
-        // combined list so rabbits consider others across groups as well
-        const allRabbits = allGroups.flat();
 
         for (const group of allGroups) {
           for (const r of group) {
             // call the flocking/separation step using the combined list
-            r.seperateFromAlignmentCohesion(allRabbits, RabbitMinDis, 5);
+            r.seperateFromAlignmentCohesion(group, RabbitMinDis, 5);
           }
         }
 
