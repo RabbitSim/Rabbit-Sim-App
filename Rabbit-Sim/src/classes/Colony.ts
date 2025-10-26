@@ -49,12 +49,11 @@ export class Colony {
         this._strategy = strategy;
     }
 
-    public takeAction(): IAction {
+    public takeAction(isDay: boolean): IAction {
 
         this._nextAction = this.chooseAction();
-        this._nextAction.takeAction(this);
-
-        return this._nextAction
+        this._nextAction.takeAction(this, undefined, isDay);
+        return this._nextAction;
     }
 
     private chooseAction() : IAction {

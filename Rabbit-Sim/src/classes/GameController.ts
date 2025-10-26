@@ -2,6 +2,7 @@ import {Colony} from "./Colony.ts"
 import {OnlySleepAndEat} from "./strategies/OnlySleepAndEat.ts";
 import {Logger} from "./logger/logger.ts";
 import type {ColonyState} from "./logger/helperInterfaces.ts";
+import { Time } from "./Time"
 
 export class GameController {
 
@@ -11,10 +12,11 @@ export class GameController {
     private _priority: number = 0;
     private _logger: Logger = new Logger();
     private _turn: number = 0;
+    private _time: Time;
 
 
     constructor() {
-
+        this._time = new Time();
     }
 
     private getColonyStates(): ColonyState[] {
@@ -35,6 +37,7 @@ export class GameController {
 
         while (!this._winnerDeclared) {
             this.takeTurns();
+            this._time.nextTurn();
             if (this._winnerDeclared) { break; }
         }
 
@@ -46,11 +49,13 @@ export class GameController {
         const n: number = this.colonies.length;
         if (n <= 0) {return;} // No colonies!
 
+        const isDay = this._time.day;
+
         for (let i: number = 0; i < n; i++) {
             const colony = this.colonies[index % n];
 
             if (!colony.isDefeated) { // Defeated colonies do not get actions
-                 const action = colony.takeAction();
+                 const action = colony.takeAction(isDay);
 
                  this.logger.recordTurn({
                      colonyId : colony.id,
@@ -70,7 +75,7 @@ export class GameController {
         this.priority = (this.priority + 1) % n;
     }
 
-    // Getters and Setters
+    // Getters and Setters  
 
     get colonies(): Array<Colony> {
         return this._colonies;
@@ -95,6 +100,10 @@ export class GameController {
 
     set priority(value: number) {
         this._priority = value;
+    }
+
+    get time(): Time {
+        return this._time;
     }
 
     public startGame(): void {
