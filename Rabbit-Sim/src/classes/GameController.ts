@@ -74,7 +74,6 @@ export class GameController {
             index++;
             this.turn++;
 
-            console.log("Hello!")
             console.log(this.logger.toJSON())
         }
 
