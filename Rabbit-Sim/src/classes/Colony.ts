@@ -55,43 +55,82 @@ export class Colony {
         this._nextAction.takeAction(this, undefined, isDay);
         return this._nextAction;
     }
-
-    private chooseAction() : IAction {
-        const weights: Record<ActionNameKey, number> = this._strategy.getWeights(this.createMetrics());
-
-        const myArray = [];
-        for (const key in weights) {
-            switch (key) {
-                case "Attack":
-                    myArray.push({"action": new Attack(), "weight": weights[key]});
-                    break;
-                case "Eat":
-                    myArray.push({"action": new Eat(), "weight": weights[key]});
-                    break;
-                case "Sleep":
-                    myArray.push({"action": new Sleep(), "weight": weights[key]});
-                    break;
-                case "UPGRADE_AGRICULTURE":
-                    myArray.push({"action": new UpgradeAgriculture(), "weight": weights[key]});
-                    break;
-                case "UPGRADE_DEFENCE":
-                    myArray.push({"action": new UpgradeDefence(), "weight": weights[key]});
-                    break;
-                case "UPGRADE_OFFENSE":
-                    myArray.push({"action": new UpgradeOffence(), "weight": weights[key]});
-                    break;
-                case "HARVEST_FOOD":
-                    myArray.push({"action": new HarvestFood(), "weight": weights[key]});
-                    break;
-                case "MEDITATE":
-                    myArray.push({"action": new Meditate(), "weight": weights[key]});
-                    break;
-
-                default:
-                    break;
-            }
+    private createActionByKey(key: ActionNameKey): IAction {
+        switch (key) {
+            case "Attack": return new Attack();
+            case "Eat": return new Eat();
+            case "Sleep": return new Sleep();
+            case "UPGRADE_AGRICULTURE": return new UpgradeAgriculture();
+            case "UPGRADE_DEFENCE": return new UpgradeDefence();
+            case "UPGRADE_OFFENSE": return new UpgradeOffence();
+            case "HARVEST_FOOD": return new HarvestFood();
+            case "MEDITATE": return new Meditate();
+            default:
+                throw new Error(`Unknown action key: ${key}`);
         }
-        return weightedRandomObject(myArray).action;
+    }
+
+    private chooseAction(): IAction {
+        const metrics = this.createMetrics();
+        const baseWeights = this._strategy.getWeights(metrics);
+
+        // Copy base weight
+        const weights: Record<ActionNameKey, number> = { ...baseWeights };
+
+        const foodRatio = this.foodStorage / Math.max(1, this.population);
+        const energy = this.energy;
+        const unrest = this.unrest;
+
+        // --- Dynamic multipliers ---
+        for (const key in weights) {
+            const k = key as ActionNameKey;
+            let multiplier = 1;
+
+            //STARVATION — crank up harvest/eat, dial down war
+            if (foodRatio < 0.5) {
+                if (k === "HARVEST_FOOD") multiplier *= 3;
+                if (k === "Eat") multiplier *= 2;
+                if (k === "Attack") multiplier *= 0.5;
+            } else if (foodRatio < 1.0) {
+                if (k === "HARVEST_FOOD") multiplier *= 1.8;
+                if (k === "Eat") multiplier *= 1.4;
+            }
+
+            //LOW ENERGY — rabbits prefer sleep
+            if (energy < 30) {
+                if (k === "Sleep") multiplier *= 3;
+                if (k === "Attack" || k.startsWith("UPGRADE_")) multiplier *= 0.5;
+            } else if (energy < 60) {
+                if (k === "Sleep") multiplier *= 1.5;
+            }
+
+            //HIGH UNREST — meditation & calmness favored
+            if (unrest > 0.7) {
+                if (k === "MEDITATE") multiplier *= 3;
+                if (k === "Attack") multiplier *= 0.6;
+            }
+
+            //SURPLUS FOOD — more willingness to upgrade or attack
+            if (foodRatio > 2 && energy > 60 && unrest < 0.5) {
+                if (k.startsWith("UPGRADE_") || k === "Attack") multiplier *= 1.5;
+            }
+
+            weights[k] = Math.max(0, weights[k] * multiplier);
+        }
+
+        //If everything got squashed to zero somehow, fall back to base weights
+        const totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
+        const finalWeights = totalWeight > 0 ? weights : baseWeights;
+
+        // --- Weighted random selection ---
+        const options = Object.entries(finalWeights)
+            .filter(([_, w]) => w > 0)
+            .map(([key, weight]) => ({
+                action: this.createActionByKey(key as ActionNameKey),
+                weight
+            }));
+
+        return weightedRandomObject(options).action;
     }
 
     private createMetrics(): ColonyMetrics {

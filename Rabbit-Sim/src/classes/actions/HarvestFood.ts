@@ -14,7 +14,7 @@ export class HarvestFood implements IAction {
         const agriLevel = actor.agriculture;
         const agriMult = ColonyMath.agricultureMultiplier(agriLevel);
 
-        const baseFoodPerRabbit = 1;
+        const baseFoodPerRabbit = 1.1;
         const foodProduced = actor.population * baseFoodPerRabbit * agriMult;
         const foodConsumed = actor.population; // each rabbit eats one food. Reasonable rabbits!
 

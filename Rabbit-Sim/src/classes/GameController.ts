@@ -26,12 +26,6 @@ export class GameController {
 
     private gameLoop(): void {
 
-        // Declare Colonies
-        this.colonies.push(
-            new Colony("number1", 100, 100, 100, 100, 99, 900, 5, new OnlySleepAndEat()),
-            new Colony("number2", 100, 100, 100, 100, 99, 900, 5, new OnlySleepAndEat())
-        )
-
         // Recording initial state
         const colonyStates: ColonyState[] = this.getColonyStates();
         this.logger.recordInitial(colonyStates);
@@ -73,8 +67,7 @@ export class GameController {
             }
             index++;
             this.turn++;
-
-            console.log(this.logger.toJSON())
+            
             this.checkWinner();
             if (this._winnerDeclared) return;
         

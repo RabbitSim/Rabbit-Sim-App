@@ -52,26 +52,47 @@ export class Attack implements IAction {
         let targetLoss = 0;
 
         if (power * (upset ? 0.7 : 1.0) > 1.1) {
-            // Attacker advantage
-            const damage = Math.round(actor.population * 0.1 * power * critMult);
+            // attacker advantage
+            const damage = Math.round(actor.population * 0.18 * power * critMult); // was 0.1
             targetLoss = damage;
             target.population = Math.max(0, target.population - damage);
-            log = `${actor.name} overwhelms ${target.name}, killing ${damage} rabbits!`;
+
+            // Loot some food as spoils of war
+            const loot = Math.round(target.foodStorage * 0.25 * Math.random()); // up to 25%
+            target.foodStorage = Math.max(0, target.foodStorage - loot);
+            actor.foodStorage += loot;
+
+            log = `${actor.name} overwhelms ${target.name}, killing ${damage} rabbits and looting ${loot} food!`;
             if (critHit) log += " (Critical strike!)";
+
         } else if (power > 0.7) {
             // Near-even fight
-            const damage = Math.round(actor.population * 0.05 * (0.8 + Math.random() * 0.4));
+            const damage = Math.round(actor.population * 0.08 * (0.8 + Math.random() * 0.4)); // was 0.05
             targetLoss = damage;
-            actorLoss = Math.round(damage * (0.4 + Math.random() * 0.4));
+            actorLoss = Math.round(damage * (0.6 + Math.random() * 0.4)); // was 0.4–0.8 ratio
             target.population = Math.max(0, target.population - targetLoss);
             actor.population = Math.max(0, actor.population - actorLoss);
-            log = `${actor.name} fought ${target.name} to a chaotic draw. (${actorLoss} vs ${targetLoss} lost)`;
+
+            // shared unrest spike
+            actor.unrest = ColonyMath.clamp(actor.unrest + 0.05, 0, 1);
+            target.unrest = ColonyMath.clamp(target.unrest + 0.05, 0, 1);
+
+            log = `${actor.name} fought ${target.name} to a brutal draw. ${actorLoss} attackers and ${targetLoss} defenders perished.`;
+
         } else {
             // Defender advantage
-            const damage = Math.round(actor.population * 0.07 * (0.8 + Math.random() * 0.5));
+            const damage = Math.round(actor.population * 0.12 * (0.8 + Math.random() * 0.5)); // was 0.07
             actorLoss = damage;
             actor.population = Math.max(0, actor.population - damage);
-            log = `${actor.name} failed to breach ${target.name}’s defences and lost ${damage} soldiers.`;
+
+            // morale collapse chance
+            if (Math.random() < 0.25) {
+                actor.unrest = ColonyMath.clamp(actor.unrest + 0.1, 0, 1);
+                log = `${actor.name} failed to breach ${target.name}’s defences, losing ${damage} soldiers. Panic spreads through the ranks!`;
+            } else {
+                log = `${actor.name} failed to breach ${target.name}’s defences and lost ${damage} soldiers.`;
+            }
+
             if (upset) log += " The defenders rallied heroically!";
         }
 

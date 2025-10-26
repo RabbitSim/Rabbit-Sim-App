@@ -1,11 +1,9 @@
-// src/classes/SimRunner.ts
 import { GameController } from "./GameController.ts";
 import { Colony } from "./Colony.ts";
 import type { IStrategy } from "./strategies/IStrategy.ts";
 import { ColonyMath } from "./math/ColonyMath.ts";
 
 type SimResult = {
-  run: number;
   winner?: string;
   turns: number;
   colonies: {
@@ -22,37 +20,27 @@ type SimResult = {
 
 export class SimRunner {
   private _strategies: IStrategy[];
-  private _runs: number;
-  private _results: SimResult[] = [];
+  private _controller: GameController;
+  private _result?: SimResult;
 
-  constructor(strategies: IStrategy[], runs = 100) {
+  constructor(strategies: IStrategy[]) {
     this._strategies = strategies;
-    this._runs = runs;
+    this._controller = new GameController();
   }
 
-  public runAll(): SimResult[] {
-    console.log(`Running ${this._runs} simulations with ${this._strategies.length} strategies...`);
-    for (let i = 0; i < this._runs; i++) {
-      const result = this.runSingleMatch(i);
-      this._results.push(result);
-    }
-    return this._results;
-  }
+  /** Runs one full simulation (one persistent world). */
+  public run(): SimResult {
+    console.log(`Running single simulation with ${this._strategies.length} strategies...`);
 
-  private runSingleMatch(runIndex: number): SimResult {
-    const controller = new GameController();
-    controller.resetGame();
+    // Reset and initialize the game world
+    this._controller.resetGame();
 
-    // Randomized starting conditions based on ColonyMath level curves
+    // Create colonies once — persistent through all turns
     const colonies: Colony[] = this._strategies.map((strategy) => {
-      const basePop = 100 + Math.floor(Math.random() * 20) - 10; // ±10 variance
-      const agriLevel = 5 + Math.floor(Math.random() * 3); // some start with better farms
+      const basePop = 100 + Math.floor(Math.random() * 20) - 10; // ±10 variation
+      const agriLevel = 5 + Math.floor(Math.random() * 3);
       const offLevel = 5 + Math.floor(Math.random() * 3);
       const defLevel = 5 + Math.floor(Math.random() * 3);
-
-      const agriBoost = ColonyMath.agricultureMultiplier(agriLevel);
-      const offBoost = ColonyMath.offenceMultiplier(offLevel);
-      const defBoost = ColonyMath.defenceMultiplier(defLevel);
 
       const energy = 100;
       const unrest = 0.1 + Math.random() * 0.05;
@@ -71,14 +59,14 @@ export class SimRunner {
       );
     });
 
-    controller.colonies = colonies;
-    controller.startGame();
+    this._controller.colonies = colonies;
+    this._controller.startGame();
 
-    const winner = controller.winnerDeclared
-      ? controller["winner"]?.name
+    const winner = this._controller.winnerDeclared
+      ? this._controller["winner"]?.name
       : undefined;
 
-    const coloniesData = controller.colonies.map((c) => ({
+    const coloniesData = this._controller.colonies.map((c) => ({
       name: c.name,
       population: c.population,
       isDefeated: c.isDefeated,
@@ -89,28 +77,21 @@ export class SimRunner {
       defence: c.defence,
     }));
 
-    return {
-      run: runIndex + 1,
+    this._result = {
       winner,
-      turns: controller.turn,
+      turns: this._controller.turn,
       colonies: coloniesData,
     };
+
+    return this._result;
   }
 
+  /** Simple summary (for your console.table). */
   public summarize(): Record<string, number> {
+    if (!this._result) return { "No results yet": 0 };
     const tally: Record<string, number> = {};
-    for (const res of this._results) {
-      const winner = res.winner ?? "None";
-      tally[winner] = (tally[winner] ?? 0) + 1;
-    }
+    const winner = this._result.winner ?? "None";
+    tally[winner] = 1;
     return tally;
-  }
-
-  public toCSV(): string {
-    const lines: string[] = ["run,winner,turns"];
-    this._results.forEach((res) =>
-      lines.push(`${res.run},${res.winner ?? "None"},${res.turns}`)
-    );
-    return lines.join("\n");
   }
 }
