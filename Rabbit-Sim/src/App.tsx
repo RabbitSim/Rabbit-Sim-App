@@ -1086,10 +1086,6 @@ const sudoColonyRefs = useRef<sudoColony[]>([
                   <span className="label">Unrest</span>
                   <span className="value">{extra.unrest ?? 0}</span>
                 </div>
-                <div className="stat-row">
-                  <span className="label">Relationships</span>
-                  <span className="value">{extra.relationships ?? "—"}</span>
-                </div>
               </div>
             );
           })}
