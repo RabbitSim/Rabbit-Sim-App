@@ -695,6 +695,11 @@ const sudoColonyRefs = useRef<sudoColony[]>([
       }
     }
 
+    setDayNum((prevDay) => {
+            const nextDay = (prevDay + 1) % 10;
+            return nextDay;
+    });
+
     // Dont unlock if rabbiting is happening
     if (!rabbitingRef.current) {
       takingTurnRef.current = false;
@@ -1020,7 +1025,7 @@ const sudoColonyRefs = useRef<sudoColony[]>([
           />
         )}
 
-        <Button label="Reset Simulation ◀" onClick={() => true} />
+        <Button label="Reset Simulation ◀" onClick={handleRun} disabled={running} />
       </div>
 
       <div>
