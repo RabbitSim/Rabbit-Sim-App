@@ -9,12 +9,23 @@ import { ColonyMath } from "../math/ColonyMath";
  * but they’ll never take our freedom!!!
  */
 export class Attack implements IAction {
-    takeAction(actor: Colony, target?: Colony): void {
+
+    public name : string = "Attack";
+
+    takeAction(actor: Colony, target?: Colony, isDay?: boolean): void {
         if (!target) return;
 
         //Core effective stats
-        const oEff = actor.offence * ColonyMath.offenceMultiplier(actor.offence);
-        const dEff = target.defence * ColonyMath.defenceMultiplier(target.defence);
+        let oEff = actor.offence * ColonyMath.offenceMultiplier(actor.offence);
+        let dEff = target.defence * ColonyMath.defenceMultiplier(target.defence);
+
+        if (isDay) {
+            dEff *= 1.25;
+            console.log(`${target.name} is fortified by daylight - defenders gain +25% defence.`);
+        } else {
+            oEff *= 1.25;
+            console.log(`${actor.name} launches a night raid under cover of darkness! (+25% attack power)`);
+        }
 
         //Random variance: +_15% swing in both offence and defence
         //Sometimes Maybe Good, Sometimes Maybe Shit
