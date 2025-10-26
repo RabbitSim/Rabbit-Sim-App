@@ -178,6 +178,8 @@ const dayNumHelper = (dayNumParam?: number, color?: string) => {
 
 function App() {
   const [running, setRunning] = useState(false);
+  const takingTurnRef = useRef(false);
+  const [takingTurn, setTakingTurn] = useState(false);
   const [simulating, setSimulating] = useState<boolean>(false);
 
   // Use refs for key state to prevent re-running useEffect
@@ -197,6 +199,8 @@ function App() {
 
   
   const [dayNum, setDayNum] = useState<number>(0)
+
+  const interpreterRef = useRef<JSONInterpreter | null>(null);
 
 const sudoColonyRefs = useRef<sudoColony[]>([
     {
@@ -509,6 +513,7 @@ const sudoColonyRefs = useRef<sudoColony[]>([
                 const theJSON = controller.logger.toJSON();
                 console.log("JSON log:", theJSON);
                 const interpreter = new JSONInterpreter();
+                interpreterRef.current = interpreter;
                 const success = interpreter.interpret(theJSON);
                 if (success) {
                     console.log("Successfully interpreted JSON log.");
@@ -520,12 +525,6 @@ const sudoColonyRefs = useRef<sudoColony[]>([
                 const initialState = interpreter.getInitialState();
                 handleInitialize(JSON.stringify(initialState));
                 console.log("Initial State:", initialState);
-                let turnNum = 0;
-                while (interpreter.hasMoreTurns()) {
-                    const turn = interpreter.getNextTurn();
-                    console.log(`Turn ${turnNum}:`, turn);
-                    turnNum++;
-                }
 
         } catch (err) {
             console.error(err);
@@ -579,6 +578,59 @@ const sudoColonyRefs = useRef<sudoColony[]>([
     }
   }
 
+  // turn based function that applies the next turn's colony states into the simulation.
+  const applyNextTurn = () => {
+  if (takingTurnRef.current) return; // instant lock check
+  takingTurnRef.current = true;
+  setTakingTurn(true);
+
+  // simulate turn processing delay
+  setTimeout(() => {
+    const nextTurn = interpreterRef.current?.getNextTurn();
+    if (!nextTurn) {
+      takingTurnRef.current = false;
+      setTakingTurn(false);
+      return;
+    }
+
+    console.log("Applying turn data:", nextTurn);
+
+    if (!sudoColonyRefs.current) return;
+
+    // Normalize both actions and colonies
+    const actions = Array.isArray(nextTurn.actions)
+      ? (nextTurn.actions as any[])
+      : [nextTurn.actions as any]; // wrap single object in array safely
+
+    const colonies = (Array.isArray(nextTurn.colonies)
+      ? nextTurn.colonies
+      : Object.values(nextTurn.colonies ?? {})) as any[];
+
+    // Apply each action
+    for (const action of actions) {
+      const colony = sudoColonyRefs.current.find((c) => c.id === (action as any).colonyId);
+      const newColonyState = colonies.find((c) => c.id === (action as any).colonyId);
+      if (!colony || !newColonyState) continue;
+
+      // Replace colony properties with new values from nextTurn
+      Object.assign(colony, newColonyState);
+
+      // Optional: Log what happened
+      console.log(
+        `Colony ${colony.name} performed ${action.action} — updated state:`,
+        newColonyState
+      );
+    }
+
+    // Unlock turn after applying
+    takingTurnRef.current = false;
+    setTakingTurn(false);
+
+    // force loading of new colony states into simulation
+    applyColoniesToSimulation(sudoColonyRefs.current);
+  }, 1000);
+};
+
   // apply the sudoColony array into the running simulation (spawn/clear rabbits, sync storages)
   const applyColoniesToSimulation = (colonies: sudoColony[]) => {
     const groupsRefs = [rabbitsRef1, rabbitsRef2, rabbitsRef3, rabbitsRef4, rabbitsRef5]
@@ -624,7 +676,7 @@ const sudoColonyRefs = useRef<sudoColony[]>([
         fs.stored = col.food
       } else if (typeof fs.height === 'number') {
         // fallback visual mapping: set height based on food
-        fs.height = Math.min(10, Math.max(0, Math.floor(col.food / 100)))
+        fs.height = Math.min(10, Math.max(0, Math.floor(col.food / 200)))
       }
     }
 
@@ -658,7 +710,7 @@ const sudoColonyRefs = useRef<sudoColony[]>([
 
         for (const group of allGroups) {
           for (const r of group) {
-            // call the flocking/separation step using the combined list
+            // call the flocking/separation step using the list
             r.seperateFromAlignmentCohesion(group, RabbitMinDis, 5);
           }
         }
@@ -683,22 +735,26 @@ const sudoColonyRefs = useRef<sudoColony[]>([
           }
         }
 
-        // remove rabbits that finished their round-trip
-        rabbitsRef1.current = rabbitsRef1.current.filter(
-          (r) => !r.isCompleted()
-        );
-        rabbitsRef2.current = rabbitsRef2.current.filter(
-          (r) => !r.isCompleted()
-        );
-        rabbitsRef3.current = rabbitsRef3.current.filter(
-          (r) => !r.isCompleted()
-        );
-        rabbitsRef4.current = rabbitsRef4.current.filter(
-          (r) => !r.isCompleted()
-        );
-        rabbitsRef5.current = rabbitsRef5.current.filter(
-          (r) => !r.isCompleted()
-        );
+        let anyRabbitFinished = false;
+
+        function filterRabbits(ref: React.MutableRefObject<Rabbit[]>) {
+          const before = ref.current.length;
+          ref.current = ref.current.filter(r => !r.isCompleted());
+          const after = ref.current.length;
+          if (after < before) anyRabbitFinished = true;
+        }
+
+        // Apply to all refs
+        filterRabbits(rabbitsRef1);
+        filterRabbits(rabbitsRef2);
+        filterRabbits(rabbitsRef3);
+        filterRabbits(rabbitsRef4);
+        filterRabbits(rabbitsRef5);
+
+        if (anyRabbitFinished) {
+          setTakingTurn(false);
+          takingTurnRef.current = false;
+        }
 
         // 4) Decay dead rabbits (existing)
         for (const dr of deadRabbitsRef.current) dr.decreaseLifetime();
@@ -708,6 +764,8 @@ const sudoColonyRefs = useRef<sudoColony[]>([
 
         // Trigger re-render
         setTick((t) => t + 1);
+
+        applyNextTurn();
       }
       raf = requestAnimationFrame(loop);
     };
@@ -882,6 +940,10 @@ const sudoColonyRefs = useRef<sudoColony[]>([
         )}
 
         <Button label="Reset Simulation ◀" onClick={() => true} />
+      </div>
+
+      <div>
+        TurnTaking Status: {takingTurn ? "True" : "False"}
       </div>
 
       <Canvas sprites={sprites} customDraw={drawSprites} dayNum={dayNum} />
