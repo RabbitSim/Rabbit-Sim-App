@@ -14,6 +14,8 @@ import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import Button from "./components/Button";
 import { GameController } from "./classes/GameController";
 import { JSONInterpreter } from './classes/jsonInterpreter';
+import { Colony } from './classes/Colony'
+import { FraserStrategy } from "./classes/strategies/FraserStrategy";
 
 interface sudoColony {
   id: number;
@@ -499,6 +501,13 @@ const sudoColonyRefs = useRef<sudoColony[]>([
     if (running) return;
     const controller = new GameController();
     controllerRef.current = controller;
+    controller.colonies = [
+      new Colony("number1", 100, 100, 100, 100, 99, 900, 5, new FraserStrategy()),
+      new Colony("number2", 100, 100, 100, 100, 99, 900, 5, new FraserStrategy()),
+      new Colony("number3", 100, 100, 100, 100, 99, 900, 5, new FraserStrategy()),
+      new Colony("number4", 100, 100, 100, 100, 99, 900, 5, new FraserStrategy()),
+      new Colony("number5", 100, 100, 100, 100, 99, 900, 5, new FraserStrategy()),
+    ];
     setRunning(true);
 
         try {

@@ -30,7 +30,7 @@ export const ColonyMath = {
     },
 
     defenceMultiplier(level: number): number {
-        const base = 1.035;
+        const base = 1.046;
         const milestones: Record<number, number> = {3: 1.03, 5: 1.06, 7: 1.08, 9: 1.1,
             11: 1.12, 13: 1.15, 15: 1.18, 17: 1.22, 19: 1.25};
         let mult = 1;
