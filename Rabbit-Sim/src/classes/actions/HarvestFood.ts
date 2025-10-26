@@ -1,9 +1,6 @@
 import type { IAction } from "./IAction.ts";
 import  { type Colony } from "../Colony";
 import { ColonyMath } from "../math/ColonyMath";
-import * as console from "node:console";
-import * as console from "node:console";
-
 /**
  * Rabbits harvest food based on agriculture tech and population.
  * TODO possibilities: add spoilage! cbtm
