@@ -63,6 +63,7 @@ export class Colony {
                 const target = potentialTargets[Math.floor(Math.random() * potentialTargets.length)];
                 console.log(`${this.name} attacks ${target.name}!`);
                 this._nextAction.takeAction(this, target, isDay);
+                (this._nextAction as any)._targetName = target.name;
             } else {
                 console.log(`${this.name} wanted to attack, but all enemies are dead.`);
             }
@@ -136,7 +137,7 @@ export class Colony {
             if (unrest > 0.9) {
                 if (k === "MEDITATE") multiplier *= 4;
                 if (k === "HARVEST_FOOD" || k === "UPGRADE_AGRICULTURE") multiplier *= 5;
-                if (k === "Attack" || k.startsWith("UPGRADE_")) multiplier *= 0.2;
+                if (k === "Attack" || (k.startsWith("UPGRADE_") && k !== "UPGRADE_AGRICULTURE")) multiplier *= 0.2;
             }
 
             //meditation is kinda needed man

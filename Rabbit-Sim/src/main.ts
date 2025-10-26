@@ -3,6 +3,9 @@ import { AggressiveStrategy } from "./classes/strategies/AggressiveStrategy";
 import { DefensiveStrategy } from "./classes/strategies/DefensiveStrategy";
 import { FraserStrategy } from "./classes/strategies/FraserStrategy";
 import { OnlySleepAndEat } from "./classes/strategies/OnlySleepAndEat";
+import { PacifistStrategy } from "./classes/strategies/PacifistStrategy";
+import { RandomStrategy } from "./classes/strategies/RandomStrategy";
+import { StarveThemOutStrategy } from "./classes/strategies/StarveThemOutStrategy";
 
 function main() {
   const strategies = [
@@ -10,6 +13,9 @@ function main() {
     new DefensiveStrategy(),
     new FraserStrategy(),
     new OnlySleepAndEat(),
+    new StarveThemOutStrategy(),
+    new RandomStrategy(),
+    new PacifistStrategy(),
   ];
 
   const runner = new SimRunner(strategies);
