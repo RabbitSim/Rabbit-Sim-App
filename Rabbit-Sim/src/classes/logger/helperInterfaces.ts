@@ -1,4 +1,4 @@
-import type {IStrategy} from "../strategies/IStrategy.ts";
+
 
 export interface ColonyState {
     id: number;
@@ -10,7 +10,7 @@ export interface ColonyState {
     offense: number;
     agriculture: number;
     isDefeated: boolean;
-    strategy: IStrategy;
+    strategy: string;
 }
 
 export interface ActionRecord {

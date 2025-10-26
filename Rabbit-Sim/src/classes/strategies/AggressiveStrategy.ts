@@ -3,6 +3,8 @@ import type { ActionNameKey } from "../actions/ActionName";
 import type { ColonyMetrics } from "../ColonyMetrics";
 
 export class AggressiveStrategy implements IStrategy {
+
+    name: string = "AggressiveStrategy";
     getWeights(_metrics: ColonyMetrics): Record<ActionNameKey, number> {
         return {
             Attack: 40,
@@ -15,4 +17,6 @@ export class AggressiveStrategy implements IStrategy {
             MEDITATE: 0,
         };
     }
+
+
 }

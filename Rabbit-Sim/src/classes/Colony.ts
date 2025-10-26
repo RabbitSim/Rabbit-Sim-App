@@ -102,16 +102,16 @@ export class Colony {
 
     public toJSON(): ColonyState {
         return {
-            id: this._id,
-            name: this._name,
-            population: this._population,
-            food: this._foodStorage,
-            energy: this._energy,
-            defense: this._defence,
-            offense: this._offence,
-            agriculture: this._agriculture,
-            isDefeated: this._isDefeated,
-            strategy: this._strategy,
+            id: this.id,
+            name: this.name,
+            population: this.population,
+            food: this.foodStorage,
+            energy: this.energy,
+            defense: this.defence,
+            offense: this.offence,
+            agriculture: this.agriculture,
+            isDefeated: this.isDefeated,
+            strategy: this.strategy.name,
         };
     }
 

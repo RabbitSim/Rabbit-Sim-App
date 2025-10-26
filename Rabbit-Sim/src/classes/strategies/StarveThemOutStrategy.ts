@@ -3,6 +3,8 @@ import type { ActionNameKey } from "../actions/ActionName";
 import type { ColonyMetrics } from "../ColonyMetrics";
 
 export class StarveThemOutStrategy implements IStrategy {
+
+    name: string = "StarveThemOutStrategy";
     getWeights(_metrics: ColonyMetrics): Record<ActionNameKey, number> {
         return {
             Attack: 0,

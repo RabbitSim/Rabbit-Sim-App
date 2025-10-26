@@ -3,6 +3,8 @@ import type { ActionNameKey } from "../actions/ActionName";
 import type { ColonyMetrics } from "../ColonyMetrics";
 
 export class RandomStrategy implements IStrategy {
+
+    name: string = "RandomStrategy";
     getWeights(_metrics: ColonyMetrics): Record<ActionNameKey, number> {
         return {
             Attack: 12.5,
