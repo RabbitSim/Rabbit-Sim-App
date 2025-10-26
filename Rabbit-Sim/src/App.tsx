@@ -6,6 +6,8 @@ import FoodStorage from './classes/ui/FoodStorage';
 import './App.css'
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import Button from './components/Button';
+import { GameController } from "./classes/GameController";
+
 
 // --- Constants ---
 
@@ -50,6 +52,7 @@ const dayNumHelper = (dayNumParam?: number, color?: string) => {
 // --- Component ---
 
 function App() {
+  const [running, setRunning] = useState(false);
   const [simulating, setSimulating] = useState<boolean>(false)
   
   // Use refs for key state to prevent re-running useEffect
@@ -69,6 +72,8 @@ function App() {
   const rabbitsRef3 = useRef<Rabbit[]>([]);
   const rabbitsRef4 = useRef<Rabbit[]>([]);
   const rabbitsRef5 = useRef<Rabbit[]>([]);
+
+  const controllerRef = useRef<GameController | null>(null);
 
   type Goal = { x: number; y: number };
 
@@ -244,6 +249,28 @@ function App() {
       window.removeEventListener('keyup', upHandler)
     }
   }, []); // Empty dependency array: this effect runs only once
+
+  const handleRun = () => {
+        if (running) return;
+        const controller = new GameController();
+        controllerRef.current = controller;
+        setRunning(true);
+
+        try {
+            // startGame may return void or a Promise; treat the return as unknown and
+            // detect a Promise at runtime to handle async completion.
+            const maybePromise = controller.startGame() as unknown;
+            // handle async startGame if it returns a Promise
+            if (maybePromise && typeof (maybePromise as any).then === "function") {
+                (maybePromise as Promise<any>).finally(() => setRunning(false));
+            } else {
+                setRunning(false);
+            }
+        } catch (err) {
+            console.error(err);
+            setRunning(false);
+        }
+    };
  
   // animation loop: call behavior update for each rabbit every frame
   useEffect(() => {
@@ -438,6 +465,9 @@ function App() {
         <p> Food Storage: </p>
         <p> Relationships: </p>
       </div>
+      <button onClick={handleRun} disabled={running}>
+        {running ? "Running..." : "Run Simulation"}
+      </button>
     </>
   )
 }
