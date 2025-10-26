@@ -5,11 +5,12 @@ import Fox from './classes/ui/Fox';
 import DeadRabbit from './classes/ui/DeadRabbit';
 import FoodStorage from './classes/ui/FoodStorage';
 import './App.css'
-// Added useCallback and useMemo
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import Button from './components/Button';
+import { GameController } from "./classes/GameController";
 
-// --- Constants (Moved outside component) ---
+
+// --- Constants ---
 
 const treePositions = [{ x: 12, y: 8 }, { x: 14, y: 9 }, { x: 13, y: 7 }, { x: 15, y: 10 }, { x: 11, y: 9 },{ x: 17, y: 8 }, { x: 16, y: 11 }, { x: 18, y: 9 },{ x: 55, y: 28 }, { x: 56, y: 29 }, { x: 57, y: 27 }, { x: 58, y: 30 }, { x: 54, y: 29 },{ x: 60, y: 28 }, { x: 61, y: 31 }, { x: 59, y: 27 },{ x: 22, y: 45 }, { x: 23, y: 44 }, { x: 24, y: 46 }, { x: 21, y: 47 }, { x: 17, y: 44 },{ x: 20, y: 46 }, { x: 26, y: 43 }, { x: 20, y: 43 },{ x: 95, y: 10 }, { x: 96, y: 11 }, { x: 97, y: 9 }, { x: 98, y: 12 }, { x: 94, y: 10 },{ x: 100, y: 9 }, { x: 99, y: 11 }, { x: 101, y: 10 },{ x: 108, y: 50 }, { x: 110, y: 51 }, { x: 111, y: 52 }, { x: 109, y: 49 }, { x: 107, y: 50 },{ x: 112, y: 51 }, { x: 110, y: 53 }, { x: 108, y: 52 }, { x: 3, y: 5 }, { x: 40, y: 22 }, { x: 70, y: 15 }, { x: 88, y: 33 }, { x: 47, y: 12 },{ x: 33, y: 38 }, { x: 64, y: 55 }, { x: 115, y: 42 }, { x: 77, y: 19 }, { x: 52, y: 59 },{ x: 6, y: 26 }, { x: 82, y: 8 }, { x: 119, y: 24 }, { x: 92, y: 57 }];
  
@@ -19,7 +20,6 @@ const burrowPositions = [{ x: 100, y: 30 }, { x: 60, y: 40 }, { x: 30, y: 15 }, 
 
 const rabbitCount = 10;
 const RabbitMinDis = 1;
-
 
 // --- Helper Function (Moved outside component) ---
 
@@ -53,10 +53,15 @@ const dayNumHelper = (dayNumParam?: number, color?: string) => {
 // --- Component ---
 
 function App() {
+  const [running, setRunning] = useState(false);
   const [simulating, setSimulating] = useState<boolean>(false)
   
   // Use refs for key state to prevent re-running useEffect
   const sPressedRef = useRef<boolean>(false)
+  const aPressedRef = useRef<boolean>(false)
+  const zPressedRef = useRef<boolean>(false)
+  const xPressedRef = useRef<boolean>(false)
+  const cPressedRef = useRef<boolean>(false)
   const dPressedRef = useRef<boolean>(false)
   const threePressedRef = useRef<boolean>(false)
   const ePressedRef = useRef<boolean>(false)
@@ -68,7 +73,28 @@ function App() {
 
   
   const [dayNum, setDayNum] = useState<number>(0)
-  const rabbitsRef = useRef<Rabbit[]>([]);
+  const rabbitsRef1 = useRef<Rabbit[]>([]);
+  const rabbitsRef2 = useRef<Rabbit[]>([]);
+  const rabbitsRef3 = useRef<Rabbit[]>([]);
+  const rabbitsRef4 = useRef<Rabbit[]>([]);
+  const rabbitsRef5 = useRef<Rabbit[]>([]);
+
+  const controllerRef = useRef<GameController | null>(null);
+
+  type Goal = { x: number; y: number };
+
+  // Define one goal for each rabbit group (rabbitsRef1..rabbitsRef5)
+  const groupGoals = useMemo<Goal[]>(
+    () => [
+      { x: 0, y: 0 }, // goal for rabbitsRef1
+      { x: 100, y: 0 }, // goal for rabbitsRef2
+      { x: 0, y: 75 }, // goal for rabbitsRef3
+      { x: 100, y: 75 }, // goal for rabbitsRef4
+      { x: 50, y: 50 } // goal for rabbitsRef5
+    ],
+    []
+  );
+
   const deadRabbitsRef = useRef<DeadRabbit[]>([]);
   const foodStorageRef = useRef<FoodStorage[]>([]);
   const foxesRef = useRef<Fox[]>([]);
@@ -83,9 +109,53 @@ function App() {
           console.log("'s' key pressed")
           sPressedRef.current = true;
 
-          // spawn 20 rabbits at 60 40
           for (let i = 0; i < rabbitCount; i++) {
-            rabbitsRef.current.push(new Rabbit(60 + Math.random() * 2, 40 + Math.random() * 2, { x: 0, y: 0 }));
+            // white colored rabbits for this group
+            rabbitsRef1.current.push(new Rabbit(100 + Math.random() * 2, 30 + Math.random() * 2, groupGoals[0], '#ffffff'));
+          }
+        }
+      }
+      if (key === 'a') {
+        if (!aPressedRef.current) {
+          console.log("'a' key pressed")
+          aPressedRef.current = true;
+
+          for (let i = 0; i < rabbitCount; i++) {
+            // Pink colored rabbits for this group
+            rabbitsRef2.current.push(new Rabbit(60 + Math.random() * 2, 40 + Math.random() * 2, groupGoals[1], '#ff69b4'));
+          }
+        }
+      }
+      if (key === 'z') {
+        if (!zPressedRef.current) {
+          console.log("'z' key pressed")
+          zPressedRef.current = true;
+
+          for (let i = 0; i < rabbitCount; i++) {
+            // light blue colored rabbits for this group
+            rabbitsRef3.current.push(new Rabbit(30 + Math.random() * 2, 15 + Math.random() * 2, groupGoals[2], '#50c2e7ff'));
+          }
+        }
+      }
+      if (key === 'x') {
+        if (!xPressedRef.current) {
+          console.log("'x' key pressed")
+          xPressedRef.current = true;
+
+          for (let i = 0; i < rabbitCount; i++) {
+            // light purple colored rabbits for this group
+            rabbitsRef4.current.push(new Rabbit(10 + Math.random() * 2, 62 + Math.random() * 2, groupGoals[3], '#bbbb10ff'));
+          }
+        }
+      }
+      if (key === 'c') {
+        if (!cPressedRef.current) {
+          console.log("'c' key pressed")
+          cPressedRef.current = true;
+
+          for (let i = 0; i < rabbitCount; i++) {
+            // grey colored rabbits for this group
+            rabbitsRef5.current.push(new Rabbit(110 + Math.random() * 2, 75 + Math.random() * 2, groupGoals[4], '#808080'));
           }
         }
       }
@@ -95,10 +165,10 @@ function App() {
           dPressedRef.current = true;
 
           // turn all rabbits to dead
-          for (const r of rabbitsRef.current) {
+          for (const r of rabbitsRef1.current) {
             deadRabbitsRef.current.push(new DeadRabbit(r.x, r.y, 100));
           }
-          rabbitsRef.current = [];
+          rabbitsRef1.current = [];
         }
       }
       if (key === '3') {
@@ -164,6 +234,22 @@ function App() {
         console.log("'s' key released")
         sPressedRef.current = false;
       }
+      if (key === 'a') {
+        console.log("'a' key released")
+        aPressedRef.current = false;
+      }
+      if (key === 'z') {
+        console.log("'z' key released")
+        zPressedRef.current = false;
+      }
+      if (key === 'x') {
+        console.log("'x' key released")
+        xPressedRef.current = false;
+      }
+      if (key === 'c') {
+        console.log("'c' key released")
+        cPressedRef.current = false;
+      }
       if (key === 'd') {
         console.log("'d' key released")
         dPressedRef.current = false;
@@ -198,44 +284,56 @@ function App() {
       window.removeEventListener('keyup', upHandler)
     }
   }, []); // Empty dependency array: this effect runs only once
+
+  const handleRun = () => {
+        if (running) return;
+        const controller = new GameController();
+        controllerRef.current = controller;
+        setRunning(true);
+
+        try {
+            // startGame may return void or a Promise; treat the return as unknown and
+            // detect a Promise at runtime to handle async completion.
+            const maybePromise = controller.startGame() as unknown;
+            // handle async startGame if it returns a Promise
+            if (maybePromise && typeof (maybePromise as any).then === "function") {
+                (maybePromise as Promise<any>).finally(() => setRunning(false));
+            } else {
+                setRunning(false);
+            }
+        } catch (err) {
+            console.error(err);
+            setRunning(false);
+        }
+    };
  
   // animation loop: call behavior update for each rabbit every frame
   useEffect(() => {
     let raf = 0;
     const loop = () => {
       if (simulating) {
-        // 1) Rabbits move
-        const arr = rabbitsRef.current;
-        for (const r of arr) {
-          r.seperateFromAlignmentCohesion(arr, RabbitMinDis, 5);
-        }
+        const allGroups = [
+          rabbitsRef1.current,
+          rabbitsRef2.current,
+          rabbitsRef3.current,
+          rabbitsRef4.current,
+          rabbitsRef5.current
+        ];
 
-        // 2) Foxes hunt (NEW)
-        if (foxesRef.current.length > 0 && rabbitsRef.current.length > 0) {
-          const killedThisFrame: Rabbit[] = [];
 
-          const worldW = Math.floor(window.innerWidth * 0.2);
-          const worldH = Math.floor(window.innerHeight * 0.2);
-
-          for (const fox of foxesRef.current) {
-            // pass all rabbits and all foxes for separation
-            const killed = fox.update(rabbitsRef.current, foxesRef.current, worldW, worldH);
-            if (killed && killed.length) killedThisFrame.push(...killed);
-          }
-
-          // Convert killed rabbits to DeadRabbit immediately
-          if (killedThisFrame.length) {
-            for (const r of killedThisFrame) {
-              deadRabbitsRef.current.push(new DeadRabbit(r.x, r.y, 100));
-            }
-            // Remove completed/killed rabbits right away
-            const deadSet = new Set(killedThisFrame);
-            rabbitsRef.current = rabbitsRef.current.filter(r => !deadSet.has(r) && !r.isCompleted());
+        for (const group of allGroups) {
+          for (const r of group) {
+            // call the flocking/separation step using the combined list
+            r.seperateFromAlignmentCohesion(group, RabbitMinDis, 5);
           }
         }
 
-        // 3) Remove rabbits that finished round-trip (existing)
-        rabbitsRef.current = rabbitsRef.current.filter(r => !r.isCompleted());
+        // remove rabbits that finished their round-trip
+        rabbitsRef1.current = rabbitsRef1.current.filter(r => !r.isCompleted());
+        rabbitsRef2.current = rabbitsRef2.current.filter(r => !r.isCompleted());
+        rabbitsRef3.current = rabbitsRef3.current.filter(r => !r.isCompleted());
+        rabbitsRef4.current = rabbitsRef4.current.filter(r => !r.isCompleted());
+        rabbitsRef5.current = rabbitsRef5.current.filter(r => !r.isCompleted());
 
         // 4) Decay dead rabbits (existing)
         for (const dr of deadRabbitsRef.current) dr.decreaseLifetime();
@@ -293,7 +391,7 @@ function App() {
       }
     }
     return sprites;
-  }, []); // Empty deps, calculates once
+  }, []);
 
   const staticRockSprites = useMemo(() => {
     const sprites: Sprite[] = [];
@@ -314,12 +412,30 @@ function App() {
     return sprites;
   }, []); // Empty deps, calculates once
 
-  // --- Dynamic Sprites (Calculated Every Frame) ---
+  // --- Dynamic Sprites ---
 
-  const rabbitsprites: Sprite[] = rabbitsRef.current.map(rabbit => {
-     const pos = rabbit.getPosition();
-     return { x: pos.x, y: pos.y, color: rabbit.color };
-   });
+  const rabbitsprites: Sprite[] = [
+    ...rabbitsRef1.current.map(rabbit => {
+      const pos = rabbit.getPosition();
+      return { x: pos.x, y: pos.y, color: rabbit.color };
+    }),
+    ...rabbitsRef2.current.map(rabbit => {
+      const pos = rabbit.getPosition();
+      return { x: pos.x, y: pos.y, color: rabbit.color };
+    }),
+    ...rabbitsRef3.current.map(rabbit => {
+      const pos = rabbit.getPosition();
+      return { x: pos.x, y: pos.y, color: rabbit.color };
+    }),
+    ...rabbitsRef4.current.map(rabbit => {
+      const pos = rabbit.getPosition();
+      return { x: pos.x, y: pos.y, color: rabbit.color };
+    }),
+    ...rabbitsRef5.current.map(rabbit => {
+      const pos = rabbit.getPosition();
+      return { x: pos.x, y: pos.y, color: rabbit.color };
+    })
+  ];
 
    const deadRabbitSprites: Sprite[] = deadRabbitsRef.current.map(dr => ({
      x: dr.x, y: dr.y, color: dr.color
@@ -381,7 +497,7 @@ function App() {
 
       <div className='stats'>
         <h2> Current Colony Stats: </h2>
-        <p> Population: {rabbitsRef.current.length} </p>
+        <p> Population: {rabbitsRef1.current.length} </p>
         <p> Agriculture: </p>
         <p> Offence:  </p>
         <p> Energy: </p>
@@ -389,6 +505,9 @@ function App() {
         <p> Food Storage: </p>
         <p> Relationships: </p>
       </div>
+      <button onClick={handleRun} disabled={running}>
+        {running ? "Running..." : "Run Simulation"}
+      </button>
     </>
   )
 }

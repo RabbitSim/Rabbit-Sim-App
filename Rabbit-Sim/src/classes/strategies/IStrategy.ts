@@ -3,5 +3,7 @@ import type {ColonyMetrics} from "../ColonyMetrics.ts";
 
 
 export interface IStrategy {
+    name: string;
     getWeights(metrics: ColonyMetrics): Record<ActionNameKey, number>;
+
 }

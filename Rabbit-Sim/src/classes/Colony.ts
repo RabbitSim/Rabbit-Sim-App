@@ -8,12 +8,19 @@ import {Sleep} from "./actions/Sleep.ts";
 import {UpgradeAgriculture} from "./actions/UpgradeAgriculture.ts";
 import {UpgradeDefence} from "./actions/UpgradeDefence.ts";
 import {UpgradeOffence} from "./actions/UpgradeOffence.ts";
-import weightedRandomObject from "weighted-random-object";
 import {HarvestFood} from "./actions/HarvestFood.ts";
 import {Meditate} from "./actions/Meditate.ts";
 import { ColonyMath } from './math/ColonyMath.ts';
 
+import weightedRandomObject from "weighted-random-object";
+
+
+import type {ColonyState} from "./logger/helperInterfaces.ts";
+
 export class Colony {
+    private static id: number = 0;
+
+    private _id: number = Colony.id++;
     private _name: string;
     private _population: number;
     private _agriculture: number;
@@ -42,10 +49,11 @@ export class Colony {
         this._strategy = strategy;
     }
 
-    public takeAction(): void {
+    public takeAction(isDay: boolean): IAction {
 
         this._nextAction = this.chooseAction();
-        this._nextAction.takeAction(this);
+        this._nextAction.takeAction(this, undefined, isDay);
+        return this._nextAction;
     }
 
     private chooseAction() : IAction {
@@ -83,13 +91,28 @@ export class Colony {
                     break;
             }
         }
-
         return weightedRandomObject(myArray).action;
     }
 
     private createMetrics(): ColonyMetrics {
         return new ColonyMetrics(this.population, this.agriculture, this.offence,
-            this.energy, this.unrest, this.foodStorage, this.relationships, this.defence);
+            this.energy, this.unrest, this.foodStorage, this.relationships, this.defence,
+            this.isDefeated);
+    }
+
+    public toJSON(): ColonyState {
+        return {
+            id: this.id,
+            name: this.name,
+            population: this.population,
+            food: this.foodStorage,
+            energy: this.energy,
+            defense: this.defence,
+            offense: this.offence,
+            agriculture: this.agriculture,
+            isDefeated: this.isDefeated,
+            strategy: this.strategy.name,
+        };
     }
 
     public modifyRelationship(otherColony: Colony, amount: number): void {
@@ -198,5 +221,9 @@ export class Colony {
 
     set strategy(value: IStrategy) {
         this._strategy = value;
+    }
+
+    get id(): number {
+        return this._id;
     }
 }
