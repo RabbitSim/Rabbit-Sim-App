@@ -1,8 +1,6 @@
 import type { IAction } from "./IAction.ts";
 import  { type Colony } from "../Colony";
 import { ColonyMath } from "../math/ColonyMath";
-import * as console from "node:console";
-import * as console from "node:console";
 
 export class UpgradeDefence implements IAction{
     private _name : string = "UpgradeDefence";
