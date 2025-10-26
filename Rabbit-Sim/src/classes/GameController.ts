@@ -43,7 +43,7 @@ export class GameController {
             if (this._winnerDeclared) { break; }
         }
         if (this._winner) {
-            console.log(` ${this._winner.name} has popped off all and rules the warren!`);
+            console.log(` ${this._winner.name} has popped off and rules the warren!`);
             console.log(this.logger.toJSON());
         }
 
