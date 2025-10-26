@@ -502,11 +502,11 @@ const sudoColonyRefs = useRef<sudoColony[]>([
     const controller = new GameController();
     controllerRef.current = controller;
     controller.colonies = [
-      new Colony("number1", 100, 100, 100, 100, 99, 900, 5, new FraserStrategy()),
-      new Colony("number2", 100, 100, 100, 100, 99, 900, 5, new FraserStrategy()),
-      new Colony("number3", 100, 100, 100, 100, 99, 900, 5, new FraserStrategy()),
-      new Colony("number4", 100, 100, 100, 100, 99, 900, 5, new FraserStrategy()),
-      new Colony("number5", 100, 100, 100, 100, 99, 900, 5, new FraserStrategy()),
+      new Colony("number1", 100 + Math.floor(Math.random() * 20) - 10, 5 + Math.floor(Math.random() * 3), 5 + Math.floor(Math.random() * 3), 100, 0.1 + Math.random() * 0.05, 500 + Math.floor(Math.random() * 200), 5 + Math.floor(Math.random() * 3), new FraserStrategy()),
+      new Colony("number2", 100 + Math.floor(Math.random() * 20) - 10, 5 + Math.floor(Math.random() * 3), 5 + Math.floor(Math.random() * 3), 100, 0.1 + Math.random() * 0.05, 500 + Math.floor(Math.random() * 200), 5 + Math.floor(Math.random() * 3), new FraserStrategy()),
+      new Colony("number3", 100 + Math.floor(Math.random() * 20) - 10, 5 + Math.floor(Math.random() * 3), 5 + Math.floor(Math.random() * 3), 100, 0.1 + Math.random() * 0.05, 500 + Math.floor(Math.random() * 200), 5 + Math.floor(Math.random() * 3), new FraserStrategy()),
+      new Colony("number4", 100 + Math.floor(Math.random() * 20) - 10, 5 + Math.floor(Math.random() * 3), 5 + Math.floor(Math.random() * 3), 100, 0.1 + Math.random() * 0.05, 500 + Math.floor(Math.random() * 200), 5 + Math.floor(Math.random() * 3), new FraserStrategy()),
+      new Colony("number5", 100 + Math.floor(Math.random() * 20) - 10, 5 + Math.floor(Math.random() * 3), 5 + Math.floor(Math.random() * 3), 100, 0.1 + Math.random() * 0.05, 500 + Math.floor(Math.random() * 200), 5 + Math.floor(Math.random() * 3), new FraserStrategy()),
     ];
     setRunning(true);
 
