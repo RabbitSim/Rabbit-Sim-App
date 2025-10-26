@@ -74,6 +74,14 @@ export class JSONInterpreter {
     return undefined; // No more turns left
   }
 
+  getCurrentTurn(): TurnData | undefined {
+    // .at(0) returns the *first* element of the array without removing it
+    if (this.turnQueue.length > 0) {
+      return this.turnQueue.at(0);
+    }
+
+    return undefined;
+  }
 
   hasMoreTurns(): boolean {
     return this.turnQueue.length > 0;
