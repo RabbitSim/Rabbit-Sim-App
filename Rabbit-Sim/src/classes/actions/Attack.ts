@@ -3,6 +3,9 @@ import type { Colony } from "../Colony";
 import { ColonyMath } from "../math/ColonyMath";
 
 export class Attack implements IAction {
+
+    public name : string = "Attack";
+
     takeAction(actor: Colony, target?: Colony): void {
         if (!target) return;
         const oEff = actor.offence * ColonyMath.offenceMultiplier(actor.offence);

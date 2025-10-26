@@ -8,11 +8,18 @@ import {Sleep} from "./actions/Sleep.ts";
 import {UpgradeAgriculture} from "./actions/UpgradeAgriculture.ts";
 import {UpgradeDefence} from "./actions/UpgradeDefence.ts";
 import {UpgradeOffence} from "./actions/UpgradeOffence.ts";
-import weightedRandomObject from "weighted-random-object";
 import {HarvestFood} from "./actions/HarvestFood.ts";
 import {Meditate} from "./actions/Meditate.ts";
 
+import weightedRandomObject from "weighted-random-object";
+
+
+import type {ColonyState} from "./logger/helperInterfaces.ts";
+
 export class Colony {
+    private static id: number = 0;
+
+    private _id: number = Colony.id++;
     private _name: string;
     private _population: number;
     private _agriculture: number;
@@ -41,10 +48,12 @@ export class Colony {
         this._strategy = strategy;
     }
 
-    public takeAction(): void {
+    public takeAction(): IAction {
 
         this._nextAction = this.chooseAction();
         this._nextAction.takeAction(this);
+
+        return this._nextAction
     }
 
     private chooseAction() : IAction {
@@ -82,13 +91,28 @@ export class Colony {
                     break;
             }
         }
-
         return weightedRandomObject(myArray).action;
     }
 
     private createMetrics(): ColonyMetrics {
         return new ColonyMetrics(this.population, this.agriculture, this.offence,
-            this.energy, this.unrest, this.foodStorage, this.relationships, this.defence);
+            this.energy, this.unrest, this.foodStorage, this.relationships, this.defence,
+            this.isDefeated);
+    }
+
+    public toJSON(): ColonyState {
+        return {
+            id: this._id,
+            name: this._name,
+            population: this._population,
+            food: this._foodStorage,
+            energy: this._energy,
+            defense: this._defence,
+            offense: this._offence,
+            agriculture: this._agriculture,
+            isDefeated: this._isDefeated,
+            strategy: this._strategy,
+        };
     }
 
     // Getters & Setters
@@ -191,5 +215,9 @@ export class Colony {
 
     set strategy(value: IStrategy) {
         this._strategy = value;
+    }
+
+    get id(): number {
+        return this._id;
     }
 }

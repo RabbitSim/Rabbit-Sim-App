@@ -3,6 +3,8 @@ import { Colony } from "../Colony";
 import { ColonyMath } from "../math/ColonyMath";
 
 export class Sleep implements IAction {
+    private _name : string = "Sleep";
+
     takeAction(actor: Colony, target?: Colony, context?: any): void {
         actor.energy = Math.min(actor.energy * 1.2, 100);
         //rabbits look ahead at their food storage to limit how many rabbits they can feasibly support
@@ -10,5 +12,9 @@ export class Sleep implements IAction {
         //logistic growth model popping off here
         actor.population += ColonyMath.populationGrowth(actor.population, 0.04, actor.foodStorage * 2);
         console.log(`${actor.name} is sleeping. Energy restored to ${actor.energy.toFixed(2)}. Population is now ${actor.population}.`);
+    }
+
+    get name(): string {
+        return this._name;
     }
 }

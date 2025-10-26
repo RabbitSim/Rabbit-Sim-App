@@ -13,6 +13,8 @@ export class OnlySleepAndEat implements IStrategy {
             UPGRADE_AGRICULTURE: 0,
             UPGRADE_DEFENCE: 0,
             UPGRADE_OFFENSE: 0,
+            HARVEST_FOOD: 0,
+            MEDITATE: 0
         };
     }
 }
