@@ -11,8 +11,10 @@ export default class Rabbit {
     maxSpeed: number;   // optional cap
     reachedGoal: boolean;
     completed: boolean;
+    attacking: boolean;
+    attacked: boolean;
 
-    constructor(x: number, y: number, goal : { x: number; y: number }, color?: string) {
+    constructor(x: number, y: number, goal : { x: number; y: number }, color?: string, attacking?: boolean, attacked?: boolean) {
         this.x = x;
         this.y = y;
         this.startX = x;
@@ -22,6 +24,15 @@ export default class Rabbit {
         this.directionVec = { x: goal.x - x, y: goal.y - y };
         // tune these to slow/speed up rabbits
         this.speed = 0.25;    // smaller = slower
+        this.attacking = attacking || false;
+        this.attacked = attacked || false;
+
+        if (this.attacking) {
+            this.speed = 0.3; // attack rabbits are faster
+        } else if (this.attacked) {
+            this.speed = 0.2; // injured rabbits are slower
+        }
+
         this.maxSpeed = 1.0;
         this.reachedGoal = false;
         this.completed = false; 
@@ -207,5 +218,35 @@ export default class Rabbit {
             }
             this.move(dx, dy);
         }
+    }
+
+    isNearEnemy(enemyRabbits: Rabbit[] | Rabbit, attackRange: number): boolean {
+        const enemies = Array.isArray(enemyRabbits) ? enemyRabbits : [enemyRabbits];
+        for (const enemy of enemies) {
+            const distX = this.x - enemy.x;
+            const distY = this.y - enemy.y;
+            const distSq = distX * distX + distY * distY;
+            if (distSq <= attackRange * attackRange) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    isAttacking(): boolean {
+        return this.attacking;
+    }
+
+    isBeingAttacked(): boolean {
+        return this.attacked;
+    }
+
+    getDeathChanceFromAttack(): number {
+        if (this.attacking) {
+            return 0.3; // 30% chance of death when attacking
+        } else if (this.attacked) {
+            return 0.1; // 10% chance of death when being attacked
+        }
+        return 0; // Default case
     }
 }

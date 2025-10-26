@@ -1,5 +1,6 @@
 import {Colony} from "./Colony.ts"
 import {OnlySleepAndEat} from "./strategies/OnlySleepAndEat.ts";
+import { FraserStrategy } from "./strategies/FraserStrategy.ts";
 import {Logger} from "./logger/logger.ts";
 import type {ColonyState} from "./logger/helperInterfaces.ts";
 import { Time } from "./Time"
@@ -28,8 +29,9 @@ export class GameController {
         // Recording initial state
         // Declare Colonies
         this.colonies.push(
-            new Colony("number1", 100, 100, 100, 100, 99, 900, 5, new OnlySleepAndEat()),
-            new Colony("number2", 100, 100, 100, 100, 99, 900, 5, new OnlySleepAndEat())
+            new Colony("number1", 100, 100, 100, 100, 99, 900, 5, new FraserStrategy()),
+            new Colony("number2", 100, 100, 100, 100, 99, 900, 5, new FraserStrategy()),
+            new Colony("number3", 100, 100, 100, 100, 99, 900, 5, new FraserStrategy()),
         )
 
         // Recording initial state
