@@ -85,13 +85,13 @@ function App() {
   type Goal = { x: number; y: number };
 
   // Define one goal for each rabbit group (rabbitsRef1..rabbitsRef5)
-  const groupGoals = useMemo<Goal[]>(
+  const groupFoodCollectionGoals = useMemo<Goal[]>(
     () => [
-      { x: 0, y: 0 }, // goal for rabbitsRef1
-      { x: 100, y: 0 }, // goal for rabbitsRef2
-      { x: 0, y: 75 }, // goal for rabbitsRef3
-      { x: 100, y: 75 }, // goal for rabbitsRef4
-      { x: 50, y: 50 } // goal for rabbitsRef5
+      { x: 100, y: 10 }, // goal for rabbitsRef1
+      { x: 60, y: 30 }, // goal for rabbitsRef2
+      { x: 10, y: 12 }, // goal for rabbitsRef3
+      { x: 20, y: 45 }, // goal for rabbitsRef4
+      { x: 110, y: 50 } // goal for rabbitsRef5
     ],
     []
   );
@@ -112,7 +112,7 @@ function App() {
 
           for (let i = 0; i < rabbitCount; i++) {
             // white colored rabbits for this group
-            rabbitsRef1.current.push(new Rabbit(100 + Math.random() * 2, 30 + Math.random() * 2, groupGoals[0], '#ffffff'));
+            rabbitsRef1.current.push(new Rabbit(100 + Math.random() * 2, 30 + Math.random() * 2, groupFoodCollectionGoals[0], '#ffffff'));
           }
         }
       }
@@ -123,7 +123,7 @@ function App() {
 
           for (let i = 0; i < rabbitCount; i++) {
             // Pink colored rabbits for this group
-            rabbitsRef2.current.push(new Rabbit(60 + Math.random() * 2, 40 + Math.random() * 2, groupGoals[1], '#ff69b4'));
+            rabbitsRef2.current.push(new Rabbit(60 + Math.random() * 2, 40 + Math.random() * 2, groupFoodCollectionGoals[1], '#ff69b4'));
           }
         }
       }
@@ -134,7 +134,7 @@ function App() {
 
           for (let i = 0; i < rabbitCount; i++) {
             // light blue colored rabbits for this group
-            rabbitsRef3.current.push(new Rabbit(30 + Math.random() * 2, 15 + Math.random() * 2, groupGoals[2], '#50c2e7ff'));
+            rabbitsRef3.current.push(new Rabbit(30 + Math.random() * 2, 15 + Math.random() * 2, groupFoodCollectionGoals[2], '#50c2e7ff'));
           }
         }
       }
@@ -145,7 +145,7 @@ function App() {
 
           for (let i = 0; i < rabbitCount; i++) {
             // light purple colored rabbits for this group
-            rabbitsRef4.current.push(new Rabbit(10 + Math.random() * 2, 62 + Math.random() * 2, groupGoals[3], '#bbbb10ff'));
+            rabbitsRef4.current.push(new Rabbit(10 + Math.random() * 2, 62 + Math.random() * 2, groupFoodCollectionGoals[3], '#bbbb10ff'));
           }
         }
       }
@@ -156,7 +156,7 @@ function App() {
 
           for (let i = 0; i < rabbitCount; i++) {
             // grey colored rabbits for this group
-            rabbitsRef5.current.push(new Rabbit(110 + Math.random() * 2, 75 + Math.random() * 2, groupGoals[4], '#808080'));
+            rabbitsRef5.current.push(new Rabbit(110 + Math.random() * 2, 70 + Math.random() * 2, groupFoodCollectionGoals[4], '#808080'));
           }
         }
       }
