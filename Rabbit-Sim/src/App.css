@@ -42,9 +42,97 @@
 }
 
 .stats {
-  text-align: left;
+  margin: 16px;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  color: #222;
 }
 
-.buttons {
-  margin : 0.5em 0;
+.stats h2 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  color: #fbfbfb;
+}
+
+/* grid layout for colony cards */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+/* card base */
+.colony-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fbfbfb 100%);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 6px 12px rgba(16, 24, 40, 0.04);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.colony-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(16, 24, 40, 0.08);
+}
+
+.colony-card.defeated {
+  opacity: 0.6;
+  filter: grayscale(0.35);
+  border-style: dashed;
+}
+
+/* header inside card */
+.colony-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.colony-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #8d96ad;
+}
+
+.badge {
+  background: #b91c1c;
+  color: #fff;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 999px;
+}
+
+/* stat rows */
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  align-items: center;
+}
+
+.stat-row:first-of-type {
+  border-top: none;
+}
+
+.label {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.value {
+  font-weight: 700;
+  color: #111827;
+  font-size: 13px;
+}
+
+/* responsive tweaks */
+@media (max-width: 520px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
 }

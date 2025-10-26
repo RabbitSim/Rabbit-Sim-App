@@ -1043,19 +1043,59 @@ const sudoColonyRefs = useRef<sudoColony[]>([
 
       <Canvas sprites={sprites} customDraw={drawSprites} dayNum={dayNum} />
 
-      <div className="stats">
-        <h2> Current Colony Stats: </h2>
-        <p> Population: {rabbitsRef1.current.length} </p>
-        <p> Agriculture: </p>
-        <p> Offence: </p>
-        <p> Energy: </p>
-        <p> Unrest: </p>
-        <p> Food Storage: </p>
-        <p> Relationships: </p>
+      <div className="stats">+        <h2>Colony Stats</h2>
+        <div className="stats-grid">
+          {sudoColonyRefs.current.map((c) => {
+            const extra = c as any;
+            return (
+              <div key={c.id} className={`colony-card ${c.isDefeated ? "defeated" : ""}`}>
+                <div className="colony-header">
+                  <h3>{c.name}</h3>
+                  {c.isDefeated && <span className="badge">Defeated</span>}
+                </div>
+
+                <div className="stat-row">
+                  <span className="label">Population</span>
+                  <span className="value">{c.population ?? 0}</span>
+                </div>
+
+                <div className="stat-row">
+                  <span className="label">Food</span>
+                  <span className="value">{c.food ?? 0}</span>
+                </div>
+
+                <div className="stat-row">
+                  <span className="label">Strategy</span>
+                  <span className="value">{c.strategy || "—"}</span>
+                </div>
+
+                {/* optional fields (show defaults if absent) */}
+                <div className="stat-row">
+                  <span className="label">Agriculture</span>
+                  <span className="value">{extra.agriculture ?? 0}</span>
+                </div>
+                <div className="stat-row">
+                  <span className="label">Offence</span>
+                  <span className="value">{extra.offense ?? extra.offence ?? 0}</span>
+                </div>
+                <div className="stat-row">
+                  <span className="label">Energy</span>
+                  <span className="value">{extra.energy ?? 0}</span>
+                </div>
+                <div className="stat-row">
+                  <span className="label">Unrest</span>
+                  <span className="value">{extra.unrest ?? 0}</span>
+                </div>
+                <div className="stat-row">
+                  <span className="label">Relationships</span>
+                  <span className="value">{extra.relationships ?? "—"}</span>
+                </div>
+              </div>
+            );
+          })}
+       </div>
       </div>
-      <button onClick={handleRun} disabled={running}>
-        {running ? "Running..." : "Load Simulation"}
-      </button>
+      <Button onClick={handleRun} disabled={running} label={running ? "Running..." : "Load Simulation"} />
     </>
   );
 }
