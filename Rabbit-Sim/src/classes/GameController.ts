@@ -75,7 +75,11 @@ export class GameController {
             this.turn++;
 
             console.log(this.logger.toJSON())
+            this.checkWinner();
+            if (this._winnerDeclared) return;
+        
         }
+        
 
         this.priority = (this.priority + 1) % n;
     }
