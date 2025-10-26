@@ -1,6 +1,6 @@
 import type { IStrategy } from "./IStrategy.ts";
 import type { ActionNameKey } from "../actions/ActionName.ts";
-import type {ColonyMetrics} from "../ColonyMetrics.ts";
+import type { ColonyMetrics } from "../ColonyMetrics.ts";
 
 export class OnlySleepAndEat implements IStrategy {
 
