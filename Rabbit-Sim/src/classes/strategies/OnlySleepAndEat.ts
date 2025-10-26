@@ -4,8 +4,8 @@ import type { ColonyMetrics } from "../ColonyMetrics.ts";
 
 export class OnlySleepAndEat implements IStrategy {
 
+    name: string = "OnlySleepAndEat";
     getWeights(_metrics: ColonyMetrics): Record<ActionNameKey, number> {
-
         return { // Should sum to 100
             Attack: 0,
             Eat: 50,

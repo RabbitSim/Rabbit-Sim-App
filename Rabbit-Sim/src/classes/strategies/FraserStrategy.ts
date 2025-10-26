@@ -4,6 +4,7 @@ import type {ColonyMetrics} from "../ColonyMetrics.ts";
 
 export class FraserStrategy implements IStrategy {
 
+    name: string = "FraserStrategy";
     getWeights(_metrics: ColonyMetrics): Record<ActionNameKey, number> {
 
         return { // Should sum to 100
