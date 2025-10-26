@@ -25,7 +25,6 @@ export class GameController {
     }
 
     private gameLoop(): void {
-
         // Recording initial state
         // Declare Colonies
         this.colonies.push(
@@ -33,6 +32,7 @@ export class GameController {
             new Colony("number2", 100, 100, 100, 100, 99, 900, 5, new OnlySleepAndEat())
         )
 
+        // Recording initial state
         const colonyStates: ColonyState[] = this.getColonyStates();
         this.logger.recordInitial(colonyStates);
 
@@ -61,20 +61,21 @@ export class GameController {
             const colony = this.colonies[index % n];
 
             if (!colony.isDefeated) { // Defeated colonies do not get actions
-                 const action = colony.takeAction(isDay);
+                const action = colony.takeAction(isDay, this._colonies);
 
-                 this.logger.recordTurn({
-                     colonyId : colony.id,
-                     colonyName : colony.name,
-                     action : action.name,
-                 },
-                   this.getColonyStates()
-                 );
+                this.logger.recordTurn({
+                    colonyId : colony.id,
+                    colonyName : colony.name,
+                    action : action.name,
+                },
+                this.getColonyStates()
+                   
+                );
+                this.checkWinner();
             }
             index++;
             this.turn++;
-            
-            this.checkWinner();
+
             if (this._winnerDeclared) return;
         
         }
@@ -82,19 +83,30 @@ export class GameController {
 
         this.priority = (this.priority + 1) % n;
     }
-
-
-
     
     /**
      * Check victory conditions and mark defeated colonies.
      */
     private checkWinner(): void {
-        // Mark dead colonies as defeated
         for (const colony of this.colonies) {
-            if (colony.population <= 0 && !colony.isDefeated) {
+            console.log(
+            `[DEBUG TURN ${this.turn}] ${colony.name} — pop=${colony.population.toFixed(4)}, defeated=${colony.isDefeated}`
+        );
+            if (colony.population <= 0.01 && !colony.isDefeated) {
+
                 colony.isDefeated = true;
-                console.log(`${colony.name} has been wiped out!`);
+
+                const lastTurn = this.logger.getLog().turns
+                    .slice()
+                    .reverse()
+                    .find(t => t.actions.colonyName === colony.name);
+
+                const lastAction = lastTurn ? lastTurn.actions.action : "Unknown";
+                const cause = this.determineCauseOfDeath(colony, lastAction);
+
+                this.logger.recordDeath(this.turn, colony.name, lastAction, cause);
+
+                console.log(`${colony.name} has been wiped out on turn ${this.turn}! Cause: ${cause}`);
             }
         }
 
@@ -104,12 +116,20 @@ export class GameController {
             this._winnerDeclared = true;
             this._winner = alive[0];
         } else if (alive.length === 0) {
-            // everyone dead = mutual extinction
             this._winnerDeclared = true;
             this._winner = undefined;
         }
-    }
+        }
 
+
+    private determineCauseOfDeath(colony: Colony, lastAction: string): string {
+        if (colony.foodStorage <= 0) return "starvation";
+        if (lastAction === "Attack") return "killed in battle";
+        if (lastAction === "HarvestFood") return "collapsed from exhaustion while harvesting";
+        if (lastAction === "Sleep") return "never woke up";
+        if (lastAction.startsWith("UPGRADE")) return "overworked their builders to death";
+        return "mysterious causes";
+    }
     // Getters and Setters  
 
     get colonies(): Array<Colony> {

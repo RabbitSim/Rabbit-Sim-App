@@ -2,7 +2,7 @@ import type {ActionRecord, ColonyState, GameLog, TurnRecord} from "./helperInter
 
 
 export class Logger {
-    private log: GameLog = { initial: [], turns: [] };
+    private log: GameLog = { initial: [], turns: [], deaths: [] };
     private currentTurn = 0;
     private initialRecorded = false;
 
@@ -29,6 +29,17 @@ export class Logger {
         this.currentTurn += 1;
     }
 
+
+    public recordDeath(turn: number, colonyName: string, lastAction: string, cause: string): void {
+        if (!this.log.deaths) this.log.deaths = [];
+        this.log.deaths.push({
+        turn,
+        colonyName,
+        lastAction,
+        cause,
+        });
+    }
+
     public getLog(): GameLog {
         return structuredClone(this.log);
     }
@@ -38,7 +49,7 @@ export class Logger {
     }
 
     public reset(): void {
-        this.log = { initial: [], turns: [] };
+        this.log = { initial: [], turns: [], deaths: []};
         this.currentTurn = 0;
         this.initialRecorded = false;
     }

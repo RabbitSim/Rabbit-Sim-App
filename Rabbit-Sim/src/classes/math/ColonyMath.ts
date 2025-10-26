@@ -19,7 +19,8 @@ export const ColonyMath = {
 
     offenceMultiplier(level: number): number {
         const base = 1.04;
-        const milestones: Record<number, number> = {3:1.03,5:1.06,7:1.05,9:1.05,11:1.05,13:1.05,15:1.16,17:1.14,19:1.16};
+        const milestones: Record<number, number> = {3: 1.05, 5: 1.08, 7: 1.1, 9: 1.12,
+            11: 1.15, 13: 1.18, 15: 1.25, 17: 1.3, 19: 1.4};
         let mult = 1;
         for (let i = 2; i <= level; i++) {
             mult *= base;
@@ -30,7 +31,8 @@ export const ColonyMath = {
 
     defenceMultiplier(level: number): number {
         const base = 1.035;
-        const milestones: Record<number, number> = {3:1.02,5:1.05,7:1.04,9:1.05,11:1.04,13:1.06,15:1.12,17:1.12,19:1.14};
+        const milestones: Record<number, number> = {3: 1.03, 5: 1.06, 7: 1.08, 9: 1.1,
+            11: 1.12, 13: 1.15, 15: 1.18, 17: 1.22, 19: 1.25};
         let mult = 1;
         for (let i = 2; i <= level; i++) {
             mult *= base;

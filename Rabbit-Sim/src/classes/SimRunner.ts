@@ -1,7 +1,6 @@
 import { GameController } from "./GameController.ts";
 import { Colony } from "./Colony.ts";
 import type { IStrategy } from "./strategies/IStrategy.ts";
-import { ColonyMath } from "./math/ColonyMath.ts";
 
 type SimResult = {
   winner?: string;
@@ -87,11 +86,40 @@ export class SimRunner {
   }
 
   /** Simple summary (for your console.table). */
-  public summarize(): Record<string, number> {
+  public summarize(): Record<string, any> {
     if (!this._result) return { "No results yet": 0 };
-    const tally: Record<string, number> = {};
+
+    const summary: Record<string, any> = {};
+
+    //Winner info
     const winner = this._result.winner ?? "None";
-    tally[winner] = 1;
-    return tally;
+    summary["Winner"] = winner;
+    summary["Turns Survived"] = this._result.turns;
+
+    //Death log (if available)
+    const log = this._controller.logger.getLog();
+    const deaths = log.deaths ?? [];
+
+    if (deaths.length > 0) {
+      summary["Deaths"] = deaths.map((d) => ({
+        turn: d.turn,
+        colony: d.colonyName,
+        cause: d.cause,
+        lastAction: d.lastAction,
+      }));
+    } else {
+      summary["Deaths"] = "None — all lived or died offscreen.";
+    }
+
+    //Final populations snapshot
+    summary["Final Colonies"] = this._result.colonies.map((c) => ({
+      name: c.name,
+      population: c.population.toFixed(1),
+      food: Math.round(c.food),
+      isDefeated: c.isDefeated,
+    }));
+
+    return summary;
   }
+
 }

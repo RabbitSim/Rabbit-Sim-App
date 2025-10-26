@@ -25,7 +25,15 @@ export interface TurnRecord {
     colonies: ColonyState[];
 }
 
+export interface DeathRecord {
+  turn: number;
+  colonyName: string;
+  lastAction: string;
+  cause: string;
+}
+
 export interface GameLog {
-    initial: ColonyState[];  // first snapshot before any turn
-    turns: TurnRecord[];
+  initial: ColonyState[];
+  turns: TurnRecord[];
+  deaths?: DeathRecord[];
 }
