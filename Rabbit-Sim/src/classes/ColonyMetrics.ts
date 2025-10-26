@@ -10,9 +10,12 @@ export class ColonyMetrics {
     private _foodStorage: number;
     private _relationships: Map<Colony, number> = new Map();
     private _defence: number;
+    private _isDefeated: boolean;
 
 
-    constructor(population: number, agriculture: number, offence: number, energy: number, unrest: number, foodStorage: number, relationships: Map<Colony, number>, defence: number) {
+    constructor(population: number, agriculture: number, offence: number, energy: number,
+                unrest: number, foodStorage: number, relationships: Map<Colony, number>,
+                defence: number, isDefeated: boolean) {
         this._population = population;
         this._agriculture = agriculture;
         this._offence = offence;
@@ -21,6 +24,7 @@ export class ColonyMetrics {
         this._foodStorage = foodStorage;
         this._relationships = relationships;
         this._defence = defence;
+        this._isDefeated = isDefeated;
     }
 
     // Getters
@@ -55,5 +59,9 @@ export class ColonyMetrics {
 
     get defence(): number {
         return this._defence;
+    }
+
+    get isDefeated(): boolean {
+        return this._isDefeated;
     }
 }

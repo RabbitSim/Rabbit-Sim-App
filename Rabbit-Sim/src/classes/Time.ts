@@ -1,4 +1,4 @@
-class Time {
+export class Time {
     private static readonly NIGHT_START = 4;
     private static readonly CYCLE_RESET = 9;
     private _day : boolean
