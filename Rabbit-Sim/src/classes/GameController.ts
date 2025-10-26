@@ -32,6 +32,8 @@ export class GameController {
             new Colony("number1", 100, 100, 100, 100, 99, 900, 5, new FraserStrategy()),
             new Colony("number2", 100, 100, 100, 100, 99, 900, 5, new FraserStrategy()),
             new Colony("number3", 100, 100, 100, 100, 99, 900, 5, new FraserStrategy()),
+            new Colony("number4", 100, 100, 100, 100, 99, 900, 5, new FraserStrategy()),
+            new Colony("number5", 100, 100, 100, 100, 99, 900, 5, new FraserStrategy()),
         )
 
         // Recording initial state

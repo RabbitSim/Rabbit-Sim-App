@@ -30,7 +30,7 @@ export default class Rabbit {
         if (this.attacking) {
             this.speed = 0.3; // attack rabbits are faster
         } else if (this.attacked) {
-            this.speed = 0.2; // injured rabbits are slower
+            this.speed = 0.25; // injured rabbits are slower
         }
 
         this.maxSpeed = 1.0;

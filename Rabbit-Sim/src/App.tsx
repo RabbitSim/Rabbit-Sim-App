@@ -592,12 +592,33 @@ const sudoColonyRefs = useRef<sudoColony[]>([
 
     // simulate turn processing delay
     setTimeout(() => {
-    const nextTurn = interpreterRef.current?.getCurrentTurn();
-    interpreterRef.current?.getNextTurn();
+    let nextTurn = interpreterRef.current?.getNextTurn();
+    
     if (!nextTurn) {
-      takingTurnRef.current = false;
-      setTakingTurn(false);
-      return;
+      console.log("No more turns to apply.");
+      nextTurn = {
+        // provide a turn index so the object satisfies the TurnData interface
+        turn: 0,
+        actions: ((sudoColonyRefs.current || []).map((c) => ({
+          colonyId: c.id,
+          colonyName: c.name,
+          action: "NoOp",
+        })) as unknown) as any,
+        // Ensure each colony object includes the full ColonyData shape expected by the interpreter
+        colonies: (sudoColonyRefs.current || []).map((c) => ({
+          id: c.id,
+          name: c.name,
+          population: c.population,
+          food: c.food,
+          isDefeated: c.isDefeated,
+          strategy: c.strategy,
+          // default values for properties required by ColonyData type
+          energy: 0,
+          defense: 0,
+          offense: 0,
+          agriculture: 0,
+        })),
+      };
     }
 
     console.log("Applying turn data:", nextTurn);
@@ -634,11 +655,13 @@ const sudoColonyRefs = useRef<sudoColony[]>([
         }
       }
 
+
       // some actions are special and will show the rabbits doing things
       if (action.action === "HarvestFood") {
         // find the rabbit group for this colony
+        // get index of colong and group by action.colonyId
+        const index = action.colonyId;
         const groupsRefs = [rabbitsRef1, rabbitsRef2, rabbitsRef3, rabbitsRef4, rabbitsRef5];
-        const index = sudoColonyRefs.current.indexOf(colony);
         const rabbitGroup = groupsRefs[index]?.current;
         if (rabbitGroup) {
           // Show the rabbits doing their thing
@@ -650,25 +673,25 @@ const sudoColonyRefs = useRef<sudoColony[]>([
           rabbitingRef.current = true;
         }
       } else if (typeof (action as any).action === "string" && (action as any).action.includes("Attack")) {
-        // find the rabbit group for this colony
-        const groupsRefs = [rabbitsRef1, rabbitsRef2, rabbitsRef3, rabbitsRef4, rabbitsRef5];
-        const index = sudoColonyRefs.current.indexOf(colony);
-        const rabbitGroup = groupsRefs[index]?.current;
+        // find numeric ids (don't mix id vs index)
+        const index = action.colonyId - 1;
+        const lastChar = (action as any).action.slice(-1);
+        const targetId = parseInt(lastChar, 10) - 1; // keep 1-based id as in your colony objects
 
-        // find the enemy rabbit group from the last characters of the action string
-        const enemyColonyId = parseInt((action as any).action.slice(-1)) - 1;
-        const enemyIndex = sudoColonyRefs.current.findIndex(c => c.id === enemyColonyId);
-        const enemyRabbitGroup = groupsRefs[enemyIndex]?.current;
 
-        if (rabbitGroup && enemyRabbitGroup) {
-          
-          console.log(`Rabbits in ${colony.name} are attacking Colony ${enemyColonyId}!`);
-          const number_of_attackers = Math.min(10, Math.floor(colony.population / 10));
-          
-          spawnRabbitstoGoal(number_of_attackers, burrowPositions[enemyIndex], index);
-          spawnRabbitstoGoal(number_of_attackers, burrowPositions[enemyIndex], index);
+        if (index === -1 || targetId === -1) {
+          console.warn("Could not resolve attacker or defender index:", index, targetId);
+        } else {
+          console.log(`Rabbits in ${colony.name} are attacking Colony ${targetId}!`);
+          const number_of_attackers = Math.min(30, Math.floor(colony.population / 10));
+          const number_of_defenders = Math.min(30, Math.floor(sudoColonyRefs.current[targetId].population / 10));
+
+          spawnRabbitstoGoal(number_of_attackers, burrowPositions[targetId], index, true, false);
+          spawnRabbitstoGoal(number_of_defenders, burrowPositions[index], targetId, false, true);
+
           rabbitingRef.current = true;
         }
+      
       }
     }
 
@@ -685,31 +708,6 @@ const sudoColonyRefs = useRef<sudoColony[]>([
 
   // apply the sudoColony array into the running simulation (spawn/clear rabbits, sync storages)
   const applyColoniesToSimulation = (colonies: sudoColony[]) => {
-    const groupsRefs = [rabbitsRef1, rabbitsRef2, rabbitsRef3, rabbitsRef4, rabbitsRef5]
-    const colors = ['#ffffff','#ff69b4','#50c2e7ff','#bbbb10ff','#808080']
-    const spawns = [{ x: 100, y: 10 }, { x: 60, y: 30 }, { x: 10, y: 12 }, { x: 20, y: 45 }, { x: 110, y: 50 }]
-
-    for (let i = 0; i < 5; i++) {
-      const col = colonies[i]
-      const ref = groupsRefs[i]
-      if (!col || !ref) continue
-
-      // If colony defeated, clear rabbits for that group
-      if (col.isDefeated) {
-        ref.current = []
-        continue
-      }
-
-      // Heuristic: spawn one rabbit per 10 population (cap to avoid runaway)
-      const desiredCount = Math.min(200, Math.max(0, Math.floor(col.population / 10)))
-
-      // Add rabbits until desired
-      while (ref.current.length < desiredCount) {
-        ref.current.push(new Rabbit(spawns[i].x + Math.random() * 2, spawns[i].y + Math.random() * 2, groupFoodCollectionGoals[i], colors[i]))
-      }
-      // Trim extras
-      if (ref.current.length > desiredCount) ref.current.length = desiredCount
-    }
 
     // Try to sync food into FoodStorage objects if they expose methods/properties
     for (let i = 0; i < foodStorageRef.current.length; i++) {
@@ -804,8 +802,11 @@ const sudoColonyRefs = useRef<sudoColony[]>([
         filterRabbits(rabbitsRef5);
 
         if (anyRabbitFinished) {
-          setTakingTurn(false);
-          takingTurnRef.current = false;
+          // delay unlocking turn-taking by ~1 second
+          setTimeout(() => {
+            setTakingTurn(false);
+            takingTurnRef.current = false;
+          }, 1000);
         }
 
         // 4) Decay dead rabbits (existing)
