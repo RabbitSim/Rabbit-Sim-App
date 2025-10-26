@@ -62,11 +62,12 @@ export class GameController {
 
             if (!colony.isDefeated) { // Defeated colonies do not get actions
                 const action = colony.takeAction(isDay, this._colonies);
+                const targetName = (action as any)._targetName ?? "-";
 
                 this.logger.recordTurn({
                     colonyId : colony.id,
                     colonyName : colony.name,
-                    action : action.name,
+                    action: action.name + (targetName !== "-" ? ` - ${targetName}` : ""),
                 },
                 this.getColonyStates()
                    
