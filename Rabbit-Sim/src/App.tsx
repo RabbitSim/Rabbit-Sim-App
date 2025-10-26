@@ -8,6 +8,7 @@ import './App.css'
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import Button from './components/Button';
 import { GameController } from "./classes/GameController";
+import { JSONInterpreter } from './classes/jsonInterpreter';
 
 
 // --- Constants ---
@@ -294,13 +295,22 @@ function App() {
         try {
             // startGame may return void or a Promise; treat the return as unknown and
             // detect a Promise at runtime to handle async completion.
-            const maybePromise = controller.startGame() as unknown;
+            controller.startGame() as unknown;
             // handle async startGame if it returns a Promise
-            if (maybePromise && typeof (maybePromise as any).then === "function") {
-                (maybePromise as Promise<any>).finally(() => setRunning(false));
-            } else {
                 setRunning(false);
-            }
+                console.log("----------------------------------------------------------------------------");
+                console.log("----------------------------------------------------------------------------");
+                console.log("----------------------------------------------------------------------------");
+
+                const theJSON = controller.logger.toJSON();
+                const interpreter = new JSONInterpreter();
+                const success = interpreter.interpret(theJSON);
+                if (success) {
+                    console.log("Successfully interpreted JSON log.");
+                } else {
+                    console.error("Failed to interpret JSON log.");
+                    return;
+                }
         } catch (err) {
             console.error(err);
             setRunning(false);
@@ -506,7 +516,7 @@ function App() {
         <p> Relationships: </p>
       </div>
       <button onClick={handleRun} disabled={running}>
-        {running ? "Running..." : "Run Simulation"}
+        {running ? "Running..." : "Load Simulation"}
       </button>
     </>
   )
