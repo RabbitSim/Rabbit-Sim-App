@@ -1,17 +1,20 @@
-import type { Action } from "./Action";
-import type { Colony } from "../Colony";
+import type { IAction } from "./IAction.ts";
+import  { type Colony } from "../Colony";
 import { ColonyMath } from "../math/ColonyMath";
 
 /**
  * Rabbits harvest food based on agriculture tech and population.
  * TODO possibilities: add spoilage! cbtm
  */
-export class HarvestFood implements Action {
+export class HarvestFood implements IAction {
+
+    private _name : string = "HarvestFood";
+
     takeAction(actor: Colony): void {
         const agriLevel = actor.agriculture;
         const agriMult = ColonyMath.agricultureMultiplier(agriLevel);
 
-        const baseFoodPerRabbit = 1;
+        const baseFoodPerRabbit = 1.1;
         const foodProduced = actor.population * baseFoodPerRabbit * agriMult;
         const foodConsumed = actor.population; // each rabbit eats one food. Reasonable rabbits!
 
@@ -44,5 +47,9 @@ export class HarvestFood implements Action {
             actor.unrest = 0;
             console.log(`${actor.name} has transcended hunger. The carrots feed themselves.`);
         }
+    }
+
+    get name(): string {
+        return this._name;
     }
 }

@@ -1,8 +1,8 @@
-import type { Action } from './Action';
+import type { IAction } from './IAction.ts';
 import { Colony } from '../Colony';
 
-export class Eat implements Action {
-    readonly name = 'Eat';
+export class Eat implements IAction {
+    name = 'Eat';
 
     takeAction(actor: Colony, target?: Colony, context?: any): void {
         const food = actor.foodStorage;
@@ -11,10 +11,20 @@ export class Eat implements Action {
         console.log("Eating");
 
         if (food <= 0) {
-            actor.foodStorage = 0;
-            actor.population = 0;
-            actor.isDefeated = true;
-            context?.log?.(`${actor.name} had no food and collapsed.`);
+            const lossPercent = 0.5 + Math.random() * 0.3; // lose 50–80%
+            let survivors = population * (1 - lossPercent);
+
+            // If already critically low, finish them off
+            if (survivors < 5) {
+                actor.population = 0;
+                console.log(`${actor.name} has completely starved to death.`);
+            } else {
+                actor.population = survivors;
+                actor.energy = Math.max(10, actor.energy * 0.5);
+                actor.unrest = Math.min(1, actor.unrest + 0.25);
+                actor.foodStorage = 0;
+                console.log(`${actor.name} starved! Lost ${(lossPercent * 100).toFixed(0)}% of population.`);
+            }
             return;
         }
 
@@ -23,9 +33,17 @@ export class Eat implements Action {
         const unfed = population - consumed;
 
         if (unfed > 0) {
-            actor.population = Math.max(0, population - unfed);
-            if (actor.population === 0) actor.isDefeated = true;
-            context?.log?.(`${actor.name} lost ${unfed} to starvation.`);
-        }
+            const lossPercent = Math.min(0.3, unfed / population);
+            let survivors = Math.max(1, population * (1 - lossPercent));
+            if (survivors < 5) {
+                survivors = 0;
+                console.log(`${actor.name} has perished from underfeeding.`);
+            }
+            else{
+            actor.population = survivors;
+            actor.unrest = Math.min(1, actor.unrest + 0.1);
+            console.log(`${actor.name} was underfed — lost ${(lossPercent * 100).toFixed(0)}% pop.`);
+            }
+        }   
     }
 }

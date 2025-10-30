@@ -5,6 +5,8 @@ export const ActionName = {
     UPGRADE_AGRICULTURE: 3,
     UPGRADE_DEFENCE: 4,
     UPGRADE_OFFENSE: 5,
+    HARVEST_FOOD: 6,
+    MEDITATE: 7,
 } as const;
 
 export type ActionNameValue = (typeof ActionName)[keyof typeof ActionName];
