@@ -16,6 +16,16 @@ import { GameController } from "./classes/GameController";
 import { JSONInterpreter } from './classes/JsonInterpreter';
 import { Colony } from './classes/Colony'
 import { FraserStrategy } from "./classes/strategies/FraserStrategy";
+import { StrategyPicker } from './components/StrategyPicker';
+import { SimRunner } from './classes/SimRunner';
+import type { IStrategy } from './classes/strategies/IStrategy';
+import { AggressiveStrategy } from './classes/strategies/AggressiveStrategy';
+import { DefensiveStrategy } from './classes/strategies/DefensiveStrategy';
+import { OnlySleepAndEat } from './classes/strategies/OnlySleepAndEat';
+import { PacifistStrategy } from './classes/strategies/PacifistStrategy';
+import { RandomStrategy } from './classes/strategies/RandomStrategy';
+import { StarveThemOutStrategy } from './classes/strategies/StarveThemOutStrategy';
+
 
 interface sudoColony {
   id: number;
@@ -184,6 +194,8 @@ function App() {
   const rabbitingRef = useRef(false);
   const [takingTurn, setTakingTurn] = useState(false);
   const [simulating, setSimulating] = useState<boolean>(false);
+  const [simulationResult, setSimulationResult] = useState<any>(null);
+  const [isRunningSimRunner, setIsRunningSimRunner] = useState(false);
 
   // Use refs for key state to prevent re-running useEffect
   const sPressedRef = useRef<boolean>(false);
@@ -204,6 +216,16 @@ function App() {
   const [dayNum, setDayNum] = useState<number>(0)
 
   const interpreterRef = useRef<JSONInterpreter | null>(null);
+
+  // visual simulation strategy selection
+  const [selectedVisualStrategies, setSelectedVisualStrategies] = useState<IStrategy[]>([
+    new FraserStrategy(),
+    new FraserStrategy(),
+    new FraserStrategy(),
+    new FraserStrategy(),
+    new FraserStrategy(),
+  ]);
+
 
 const sudoColonyRefs = useRef<sudoColony[]>([
     {
@@ -501,13 +523,19 @@ const sudoColonyRefs = useRef<sudoColony[]>([
     if (running) return;
     const controller = new GameController();
     controllerRef.current = controller;
-    controller.colonies = [
-      new Colony("number1", 100 + Math.floor(Math.random() * 20) - 10, 5 + Math.floor(Math.random() * 3), 5 + Math.floor(Math.random() * 3), 100, 0.1 + Math.random() * 0.05, 500 + Math.floor(Math.random() * 200), 5 + Math.floor(Math.random() * 3), new FraserStrategy()),
-      new Colony("number2", 100 + Math.floor(Math.random() * 20) - 10, 5 + Math.floor(Math.random() * 3), 5 + Math.floor(Math.random() * 3), 100, 0.1 + Math.random() * 0.05, 500 + Math.floor(Math.random() * 200), 5 + Math.floor(Math.random() * 3), new FraserStrategy()),
-      new Colony("number3", 100 + Math.floor(Math.random() * 20) - 10, 5 + Math.floor(Math.random() * 3), 5 + Math.floor(Math.random() * 3), 100, 0.1 + Math.random() * 0.05, 500 + Math.floor(Math.random() * 200), 5 + Math.floor(Math.random() * 3), new FraserStrategy()),
-      new Colony("number4", 100 + Math.floor(Math.random() * 20) - 10, 5 + Math.floor(Math.random() * 3), 5 + Math.floor(Math.random() * 3), 100, 0.1 + Math.random() * 0.05, 500 + Math.floor(Math.random() * 200), 5 + Math.floor(Math.random() * 3), new FraserStrategy()),
-      new Colony("number5", 100 + Math.floor(Math.random() * 20) - 10, 5 + Math.floor(Math.random() * 3), 5 + Math.floor(Math.random() * 3), 100, 0.1 + Math.random() * 0.05, 500 + Math.floor(Math.random() * 200), 5 + Math.floor(Math.random() * 3), new FraserStrategy()),
-    ];
+    controller.colonies = selectedVisualStrategies.map((strategy, index) => 
+      new Colony(
+        `Colony ${index + 1}`,
+        100 + Math.floor(Math.random() * 20) - 10,
+        5 + Math.floor(Math.random() * 3),
+        5 + Math.floor(Math.random() * 3),
+        100,
+        0.1 + Math.random() * 0.05,
+        500 + Math.floor(Math.random() * 200),
+        5 + Math.floor(Math.random() * 3),
+        strategy
+      )
+    );
     setRunning(true);
 
         try {
@@ -541,6 +569,24 @@ const sudoColonyRefs = useRef<sudoColony[]>([
             setRunning(false);
         }
     };
+
+  // Handler to update strategy for a specific colony
+  const handleStrategyChange = (colonyIndex: number, strategyName: string) => {
+    const strategyMap: Record<string, () => IStrategy> = {
+      'Aggressive': () => new AggressiveStrategy(),
+      'Defensive': () => new DefensiveStrategy(),
+      'Fraser': () => new FraserStrategy(),
+      'Sleep & Eat': () => new OnlySleepAndEat(),
+      'Pacifist': () => new PacifistStrategy(),
+      'Random': () => new RandomStrategy(),
+      'Starve Them Out': () => new StarveThemOutStrategy(),
+    };
+
+    const newStrategies = [...selectedVisualStrategies];
+    newStrategies[colonyIndex] = strategyMap[strategyName]();
+    setSelectedVisualStrategies(newStrategies);
+  };
+
 
   const handleInitialize = (initState: string): void => {
     try {
@@ -1015,6 +1061,100 @@ const sudoColonyRefs = useRef<sudoColony[]>([
     },
     [dayNum]
   ); // Only recreate this function if dayNum changes
+  
+  const handleRunSimulation = async (strategies: IStrategy[], runCount: number) => {
+    setIsRunningSimRunner(true);
+    setSimulationResult(null);
+
+    setTimeout(() => {
+      try {
+        if (runCount === 1) {
+          // Single run - show detailed results
+          const runner = new SimRunner(strategies);
+          const result = runner.run();
+          const summary = runner.summarize();
+          
+          setSimulationResult({ 
+            result, 
+            summary, 
+            isAveraged: false,
+            runCount: 1 
+          });
+        } else {
+          // Multiple runs - calculate averaged results
+          const allResults: any[] = [];
+          const strategyWins: Record<string, number> = {};
+          const strategyNames = strategies.map(s => s.constructor.name);
+          
+          // Initialize win counters
+          strategyNames.forEach(name => {
+            strategyWins[name] = 0;
+          });
+
+          // Run multiple simulations
+          for (let i = 0; i < runCount; i++) {
+            const runner = new SimRunner(strategies);
+            const result = runner.run();
+            const summary = runner.summarize();
+            allResults.push(summary);
+            
+            // Track winner
+            const winnerName = summary["Winner"];
+            if (winnerName && strategyWins[winnerName] !== undefined) {
+              strategyWins[winnerName]++;
+            }
+          }
+
+          // Calculate averages
+          const avgTurnsSurvived = allResults.reduce((sum, r) => sum + (r["Turns Survived"] || 0), 0) / runCount;
+          
+          // Aggregate final colony stats
+          const colonyAggregates: Record<string, { totalPop: number, totalFood: number, survived: number, count: number }> = {};
+          
+          allResults.forEach(summary => {
+            const finalColonies = summary["Final Colonies"] || [];
+            finalColonies.forEach((colony: any) => {
+              const name = colony.name;
+              if (!colonyAggregates[name]) {
+                colonyAggregates[name] = { totalPop: 0, totalFood: 0, survived: 0, count: 0 };
+              }
+              colonyAggregates[name].totalPop += colony.population || 0;
+              colonyAggregates[name].totalFood += colony.food || 0;
+              colonyAggregates[name].count += 1;
+              if (!colony.isDefeated) {
+                colonyAggregates[name].survived += 1;
+              }
+            });
+          });
+
+          const averagedColonies = Object.entries(colonyAggregates).map(([name, data]) => ({
+            name,
+            avgPopulation: (data.totalPop / data.count).toFixed(2),
+            avgFood: (data.totalFood / data.count).toFixed(2),
+            survivalRate: ((data.survived / runCount) * 100).toFixed(1) + '%',
+            wins: strategyWins[name] || 0,
+            winRate: (((strategyWins[name] || 0) / runCount) * 100).toFixed(1) + '%'
+          }));
+
+          setSimulationResult({
+            summary: {
+              "Winner": "Multiple runs completed",
+              "Turns Survived": avgTurnsSurvived.toFixed(2),
+              "Win Distribution": strategyWins,
+              "Final Colonies": averagedColonies
+            },
+            isAveraged: true,
+            runCount
+          });
+        }
+      } catch (error) {
+        console.error('Simulation error:', error);
+        alert('Simulation failed. Check console for details.');
+      } finally {
+        setIsRunningSimRunner(false);
+      }
+    }, 100);
+  };
 
   return (
     <>
@@ -1037,13 +1177,43 @@ const sudoColonyRefs = useRef<sudoColony[]>([
         <Button label="Reset Simulation ◀" onClick={handleRun} disabled={running} />
       </div>
 
+      {/* Visual Simulation Strategy Picker */}
+      <div style={{ marginTop: '2rem', padding: '1.5rem', background: '#f9f9f9', borderRadius: '8px' }}>
+        <h2 style={{ marginBottom: '1rem' }}>Select Strategies for Visual Simulation</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+          {selectedVisualStrategies.map((strategy, index) => (
+            <div key={index} style={{ padding: '1rem', background: 'white', borderRadius: '4px', border: '1px solid #ddd' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+                Colony {index + 1}
+              </label>
+              <select
+                value={strategy.constructor.name.replace('Strategy', '')}
+                onChange={(e) => handleStrategyChange(index, e.target.value)}
+                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+              >
+                <option value="Aggressive">Aggressive</option>
+                <option value="Defensive">Defensive</option>
+                <option value="Fraser">Fraser</option>
+                <option value="Sleep & Eat">Sleep & Eat</option>
+                <option value="Pacifist">Pacifist</option>
+                <option value="Random">Random</option>
+                <option value="Starve Them Out">Starve Them Out</option>
+              </select>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <Button onClick={handleRun} disabled={running} label={running ? "Running..." : "Load Simulation"} />
+
       {/* <div>
         TurnTaking Status: {takingTurn ? "True" : "False"}
       </div> */}
 
       <Canvas sprites={sprites} customDraw={drawSprites} dayNum={dayNum} />
 
-      <div className="stats">+        <h2>Colony Stats</h2>
+      <div className="stats">        
+        <h2>Colony Stats</h2>
         <div className="stats-grid">
           {sudoColonyRefs.current.map((c) => {
             const extra = c as any;
@@ -1091,7 +1261,111 @@ const sudoColonyRefs = useRef<sudoColony[]>([
           })}
        </div>
       </div>
-      <Button onClick={handleRun} disabled={running} label={running ? "Running..." : "Load Simulation"} />
+
+      <div style={{ marginTop: '3rem', borderTop: '2px solid #ddd', paddingTop: '2rem' }}>
+        <h2 style={{ textAlign: 'center' }}>Run Custom Strategy Simulation</h2>
+        
+        <StrategyPicker 
+          onRunSimulation={handleRunSimulation}
+          isRunning={isRunningSimRunner}
+        />
+
+        {simulationResult && (
+          <div className="results">
+            <h2>Simulation Results {simulationResult.isAveraged && `(Averaged over ${simulationResult.runCount} runs)`}</h2>
+            
+            <div className="summary-section">
+              <h3>Summary</h3>
+              {simulationResult.isAveraged ? (
+                <>
+                  <p><strong>Number of Runs:</strong> {simulationResult.runCount}</p>
+                  <p><strong>Average Turns Survived:</strong> {simulationResult.summary["Turns Survived"]}</p>
+                  <div style={{ marginTop: '1rem' }}>
+                    <strong>Win Distribution:</strong>
+                    <ul style={{ listStyle: 'none', padding: '0.5rem 0' }}>
+                      {Object.entries(simulationResult.summary["Win Distribution"] || {}).map(([strategy, wins]: [string, any]) => (
+                        <li key={strategy} style={{ padding: '0.25rem 0' }}>
+                          {strategy}: {wins} wins ({((wins / simulationResult.runCount) * 100).toFixed(1)}%)
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p><strong>Winner:</strong> {simulationResult.summary["Winner"]}</p>
+                  <p><strong>Turns Survived:</strong> {simulationResult.summary["Turns Survived"]}</p>
+                </>
+              )}
+            </div>
+
+            {!simulationResult.isAveraged && simulationResult.summary["Deaths"] && (
+              <div className="deaths-section">
+                <h3>Death Log</h3>
+                {Array.isArray(simulationResult.summary["Deaths"]) ? (
+                  <ul>
+                    {simulationResult.summary["Deaths"].map((d: any, i: number) => (
+                      <li key={i}>
+                        Turn {d.turn}: {d.colony} died ({d.cause}) after "{d.lastAction}"
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>{simulationResult.summary["Deaths"]}</p>
+                )}
+              </div>
+            )}
+
+            <div className="final-colonies-section">
+              <h3>{simulationResult.isAveraged ? 'Averaged Statistics' : 'Final Colonies'}</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Strategy</th>
+                    {simulationResult.isAveraged ? (
+                      <>
+                        <th>Avg Population</th>
+                        <th>Avg Food</th>
+                        <th>Survival Rate</th>
+                        <th>Wins</th>
+                        <th>Win Rate</th>
+                      </>
+                    ) : (
+                      <>
+                        <th>Population</th>
+                        <th>Food</th>
+                        <th>Result</th>
+                      </>
+                    )}
+                  </tr>
+                </thead>
+                <tbody>
+                  {simulationResult.summary["Final Colonies"].map((c: any, i: number) => (
+                    <tr key={i}>
+                      <td>{c.name}</td>
+                      {simulationResult.isAveraged ? (
+                        <>
+                          <td>{c.avgPopulation}</td>
+                          <td>{c.avgFood}</td>
+                          <td>{c.survivalRate}</td>
+                          <td>{c.wins}</td>
+                          <td><strong>{c.winRate}</strong></td>
+                        </>
+                      ) : (
+                        <>
+                          <td>{c.population}</td>
+                          <td>{c.food}</td>
+                          <td>{c.isDefeated ? '❌ Defeated' : '✅ Survived'}</td>
+                        </>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
     </>
   );
 }

@@ -1,0 +1,282 @@
+.custom-strategy-builder {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.builder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.builder-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.close-btn:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.builder-content {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.strategy-name-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.strategy-name-input:focus {
+  outline: none;
+  border-color: #646cff;
+}
+
+.actions-section {
+  margin-top: 2rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.section-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.add-action-btn {
+  padding: 0.5rem 1rem;
+  background: #646cff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.add-action-btn:hover {
+  background: #535bf2;
+  transform: translateY(-2px);
+}
+
+.actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.action-item {
+  padding: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fafafa;
+  transition: all 0.2s;
+}
+
+.action-item:hover {
+  border-color: #646cff;
+  background: white;
+}
+
+.action-main {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.action-select {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background: white;
+}
+
+.weight-control {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.weight-control label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.weight-slider {
+  width: 100%;
+  cursor: pointer;
+}
+
+.remove-btn {
+  padding: 0.5rem 0.75rem;
+  background: #ff6b6b;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.remove-btn:hover {
+  background: #ee5a52;
+  transform: scale(1.1);
+}
+
+.action-description {
+  font-size: 0.85rem;
+  color: #666;
+  font-style: italic;
+  margin-bottom: 0.5rem;
+}
+
+.conditions-section {
+  margin-top: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.5rem;
+  background: white;
+}
+
+.conditions-section summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: #555;
+  padding: 0.5rem;
+  user-select: none;
+}
+
+.conditions-section summary:hover {
+  color: #646cff;
+}
+
+.conditions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.condition-input {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.condition-input label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #666;
+}
+
+.condition-input input {
+  padding: 0.4rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.condition-input input:focus {
+  outline: none;
+  border-color: #646cff;
+}
+
+.builder-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 2px solid #f0f0f0;
+  margin-top: 1rem;
+}
+
+.cancel-btn,
+.create-btn {
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-btn {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.cancel-btn:hover {
+  background: #e0e0e0;
+}
+
+.create-btn {
+  background: #646cff;
+  color: white;
+}
+
+.create-btn:hover {
+  background: #535bf2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(100, 108, 255, 0.3);
+}
+
+/* Overlay backdrop */
+.strategy-builder-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}

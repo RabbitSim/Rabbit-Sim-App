@@ -1,0 +1,133 @@
+.strategy-picker {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.strategy-picker h2 {
+  margin-bottom: 0.5rem;
+}
+
+.hint {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.strategy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.strategy-card {
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  background: white;
+}
+
+.strategy-card:hover {
+  border-color: #646cff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.strategy-card.selected {
+  border-color: #646cff;
+  background: #f0f4ff;
+}
+
+.strategy-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.strategy-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.checkbox {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 24px;
+  height: 24px;
+  border: 2px solid #646cff;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #646cff;
+}
+
+.run-button {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  background: #646cff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.run-button:hover:not(:disabled) {
+  background: #535bf2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(100, 108, 255, 0.3);
+}
+
+.run-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.strategy-card.create-custom {
+  border: 2px dashed #646cff;
+  background: linear-gradient(135deg, #f0f4ff 0%, #fff 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 150px;
+}
+
+.strategy-card.create-custom:hover {
+  background: linear-gradient(135deg, #e0e8ff 0%, #f0f4ff 100%);
+  border-color: #535bf2;
+}
+
+.strategy-card.create-custom h3 {
+  color: #646cff;
+  font-size: 1.2rem;
+}
+
+.strategy-card.custom {
+  border-color: #42b883;
+}
+
+.strategy-card.custom.selected {
+  background: #f0fff4;
+  border-color: #42b883;
+}
+
+.custom-badge {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  background: #42b883;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
