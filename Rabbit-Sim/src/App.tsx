@@ -13,7 +13,7 @@ import "./App.css";
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import Button from "./components/Button";
 import { GameController } from "./classes/GameController";
-import { JSONInterpreter } from './classes/jsonInterpreter';
+import { JSONInterpreter } from './classes/JsonInterpreter';
 import { Colony } from './classes/Colony'
 import { FraserStrategy } from "./classes/strategies/FraserStrategy";
 
