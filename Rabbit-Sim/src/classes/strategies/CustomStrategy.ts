@@ -60,8 +60,6 @@ export class CustomStrategy implements IStrategy {
         if (cond.maxPopulation !== undefined && metrics.population > cond.maxPopulation) weight = 0;
         if (cond.minEnergy !== undefined && metrics.energy < cond.minEnergy) weight = 0;
         if (cond.maxEnergy !== undefined && metrics.energy > cond.maxEnergy) weight = 0;
-        // Note: isDay/isNight conditions not supported as ColonyMetrics doesn't include time info
-        // These would need to be handled at a higher level if needed
       }
 
       weights[aw.action] = Math.max(weights[aw.action], weight);
