@@ -587,6 +587,20 @@ const sudoColonyRefs = useRef<sudoColony[]>([
     setSelectedVisualStrategies(newStrategies);
   };
 
+  // Helper to get display name from strategy instance
+  const getStrategyDisplayName = (strategy: IStrategy): string => {
+    const nameMap: Record<string, string> = {
+      'AggressiveStrategy': 'Aggressive',
+      'DefensiveStrategy': 'Defensive',
+      'FraserStrategy': 'Fraser',
+      'OnlySleepAndEat': 'Sleep & Eat',
+      'PacifistStrategy': 'Pacifist',
+      'RandomStrategy': 'Random',
+      'StarveThemOutStrategy': 'Starve Them Out',
+    };
+    return nameMap[strategy.constructor.name] || strategy.name || 'Unknown';
+  };
+
 
   const handleInitialize = (initState: string): void => {
     try {
@@ -1187,7 +1201,7 @@ const sudoColonyRefs = useRef<sudoColony[]>([
                 Colony {index + 1}
               </label>
               <select
-                value={strategy.constructor.name.replace('Strategy', '')}
+                value={getStrategyDisplayName(strategy)}
                 onChange={(e) => handleStrategyChange(index, e.target.value)}
                 style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
               >
