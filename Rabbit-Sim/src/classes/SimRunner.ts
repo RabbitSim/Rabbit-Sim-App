@@ -46,7 +46,7 @@ export class SimRunner {
       const food = 500 + Math.floor(Math.random() * 200);
 
       return new Colony(
-        strategy.constructor.name,
+        strategy.name,
         basePop,
         agriLevel,
         offLevel,

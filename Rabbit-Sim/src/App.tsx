@@ -1355,7 +1355,7 @@ const sudoColonyRefs = useRef<sudoColony[]>([
                         <>
                           <td>{c.population}</td>
                           <td>{c.food}</td>
-                          <td>{c.isDefeated ? '❌ Defeated' : '✅ Survived'}</td>
+                          <td>{c.isDefeated ? 'Defeated' : 'Survived'}</td>
                         </>
                       )}
                     </tr>
