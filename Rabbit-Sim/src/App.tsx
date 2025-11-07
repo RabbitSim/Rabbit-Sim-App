@@ -1098,7 +1098,7 @@ const sudoColonyRefs = useRef<sudoColony[]>([
           // Multiple runs - calculate averaged results
           const allResults: any[] = [];
           const strategyWins: Record<string, number> = {};
-          const strategyNames = strategies.map(s => s.constructor.name);
+          const strategyNames = strategies.map(s => s.name);
           
           // Initialize win counters
           strategyNames.forEach(name => {
@@ -1132,8 +1132,12 @@ const sudoColonyRefs = useRef<sudoColony[]>([
               if (!colonyAggregates[name]) {
                 colonyAggregates[name] = { totalPop: 0, totalFood: 0, survived: 0, count: 0 };
               }
-              colonyAggregates[name].totalPop += colony.population || 0;
-              colonyAggregates[name].totalFood += colony.food || 0;
+              // Parse population as it might be a string like "42.0"
+              const population = typeof colony.population === 'string' ? parseFloat(colony.population) : (colony.population || 0);
+              const food = typeof colony.food === 'string' ? parseFloat(colony.food) : (colony.food || 0);
+              
+              colonyAggregates[name].totalPop += population;
+              colonyAggregates[name].totalFood += food;
               colonyAggregates[name].count += 1;
               if (!colony.isDefeated) {
                 colonyAggregates[name].survived += 1;
